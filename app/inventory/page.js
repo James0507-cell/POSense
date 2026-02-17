@@ -5,6 +5,7 @@ import SideBar from '../components/sideBar.js';
 import InventoryStatus from './components/InventoryStatus';
 import InventoryAnalytics from './components/InventoryAnalytics';
 import AIAnalysis from '../components/AIAnalysis';
+import InventoryForm from './components/InventoryForm';
 
 export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState('status');
@@ -15,24 +16,44 @@ export default function InventoryPage() {
 
   const [inventoryData, setInventoryData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('Manager');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  const fetchInventory = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/inventory');
+      if (response.ok) {
+        const data = await response.json();
+        setInventoryData(data);
+      }
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchInventory() {
-      try {
-        const response = await fetch('/api/inventory');
-        if (response.ok) {
-          const data = await response.json();
-          setInventoryData(data);
-        }
-      } catch (error) {
-        console.error("Error fetching inventory:", error);
-      } finally {
-        setLoading(false);
-      }
+    if (typeof window !== 'undefined') {
+      const first = sessionStorage.getItem('first_name') || '';
+      const last = sessionStorage.getItem('last_name') || '';
+      if (first || last) setUserName(`${first} ${last}`);
     }
 
     fetchInventory();
   }, []);
+
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setIsFormOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingItem(null);
+    setIsFormOpen(true);
+  };
 
   // Metrics Calculation
   const metrics = {
@@ -43,7 +64,7 @@ export default function InventoryPage() {
 
   // Chart Data for Stock vs Threshold (Maximum)
   const chartData = {
-    labels: inventoryData.map(item => item.productId || item.product_id),
+    labels: inventoryData.map(item => item.product_name || item.productId || item.product_id),
     datasets: [
       {
         label: 'Current Quantity',
@@ -116,8 +137,8 @@ export default function InventoryPage() {
           </h2>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-gray-900 leading-none">John Doe</p>
-              <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">Manager View</p>
+              <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
+              <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">View Only</p>
             </div>
           </div>
         </header>
@@ -156,7 +177,15 @@ export default function InventoryPage() {
               </div>
             ) : (
               <>
-                {activeTab === 'status' && <InventoryStatus inventoryData={inventoryData} metrics={metrics} />}
+                {activeTab === 'status' && (
+                  <InventoryStatus 
+                    inventoryData={inventoryData} 
+                    metrics={metrics} 
+                    onEdit={handleEdit} 
+                    onDelete={fetchInventory}
+                    onAdd={handleAddNew}
+                  />
+                )}
                 {activeTab === 'analytics' && <InventoryAnalytics chartData={chartData} />}
                 {activeTab === 'ai' && (
                   <AIAnalysis 
@@ -174,6 +203,15 @@ export default function InventoryPage() {
           </div>
         </div>
       </main>
+
+      {/* Inventory Form Modal */}
+      {isFormOpen && (
+        <InventoryForm 
+          item={editingItem} 
+          onClose={() => setIsFormOpen(false)} 
+          onSuccess={fetchInventory} 
+        />
+      )}
     </div>
   );
 }

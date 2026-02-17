@@ -2,13 +2,28 @@
 
 import React, { useState } from 'react';
 
-export default function InventoryStatus({ inventoryData, metrics }) {
+export default function InventoryStatus({ inventoryData, metrics, onEdit, onDelete, onAdd }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [minQty, setMinQty] = useState('');
   const [maxQty, setMaxQty] = useState('');
   const [sortOrder, setSortOrder] = useState('date-desc');
+
+  const handleDelete = async (id) => {
+    if (confirm("Are you sure you want to delete this inventory record?")) {
+      try {
+        const response = await fetch(`/api/inventory?id=${id}`, { method: 'DELETE' });
+        if (response.ok) {
+          onDelete();
+        } else {
+          alert("Failed to delete inventory record");
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+      }
+    }
+  };
 
   const filteredInventory = inventoryData.filter((item) => {
     const productId = item.productId || item.product_id || '';
@@ -140,7 +155,10 @@ export default function InventoryStatus({ inventoryData, metrics }) {
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-gray-100 flex items-center justify-between">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Inventory List</h4>
-          <button className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100">
+          <button 
+            onClick={onAdd}
+            className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100"
+          >
             Adjust Stock
           </button>
         </div>
@@ -165,7 +183,12 @@ export default function InventoryStatus({ inventoryData, metrics }) {
               {filteredInventory.map((item, index) => (
                 <tr key={item.inventory_id || item.id || index} className="hover:bg-gray-50/80 transition-colors">
                   <td className="px-6 py-5 font-bold text-blue-700 text-sm whitespace-nowrap">{item.inventory_id || item.id}</td>
-                  <td className="px-6 py-5 font-medium text-gray-700 text-sm whitespace-nowrap">{item.productId || item.product_id}</td>
+                  <td className="px-6 py-5 font-medium text-gray-700 text-sm whitespace-nowrap">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-gray-900">{item.product_name || 'N/A'}</span>
+                      <span className="text-[10px] text-gray-400 uppercase tracking-tighter">{item.product_id || item.productId}</span>
+                    </div>
+                  </td>
                   <td className="px-6 py-5 text-gray-700 text-sm whitespace-nowrap">{item.location}</td>
                   <td className="px-6 py-5 text-right font-medium text-gray-500 text-sm">{item.minimum}</td>
                   <td className="px-6 py-5 text-right font-medium text-gray-500 text-sm">{item.maximum}</td>
@@ -181,6 +204,7 @@ export default function InventoryStatus({ inventoryData, metrics }) {
                   <td className="px-6 py-5">
                     <div className="flex items-center justify-center gap-2">
                       <button 
+                        onClick={() => onEdit(item)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Update Stock"
                       >
@@ -189,6 +213,7 @@ export default function InventoryStatus({ inventoryData, metrics }) {
                         </svg>
                       </button>
                       <button 
+                        onClick={() => handleDelete(item.inventory_id || item.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete Entry"
                       >
