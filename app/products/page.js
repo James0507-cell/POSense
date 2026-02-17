@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SideBar from '../components/sideBar.js';
 import ProductList from './components/ProductList';
 import ProductAnalytics from './components/ProductAnalytics';
 import AIAnalysis from '../components/AIAnalysis';
+import ProductForm from './components/ProductForm';
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState('list');
@@ -13,45 +14,52 @@ export default function ProductsPage() {
     { role: 'assistant', content: 'Hello! I am your AI product analyst. How can I help you today?' }
   ]);
 
-  // Mock Products Data
-  const products = [
-    {
-      id: 'PROD-001',
-      brand: 'TechCorp',
-      name: 'Ultra-HD Smart Camera',
-      barcode: '1234567890123',
-      description: 'High-resolution smart camera with AI motion detection.',
-      category: 'Electronics',
-      cost_price: 120.00,
-      selling_price: 199.99,
-      tax_rate: 0.15,
-      created_by: 'Admin',
-      created_at: '2025-01-10 10:00:00',
-      updated_by: 'Admin'
-    },
-    {
-      id: 'PROD-002',
-      brand: 'FlexiFit',
-      name: 'Ergonomic Wireless Mouse',
-      barcode: '1234567890124',
-      description: 'Comfortable wireless mouse for long working hours.',
-      category: 'Accessories',
-      cost_price: 25.00,
-      selling_price: 49.99,
-      tax_rate: 0.15,
-      created_by: 'Admin',
-      created_at: '2025-01-12 14:30:00',
-      updated_by: 'Editor'
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
-  // Stock by Product Data (Bar Chart)
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/products');
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched products data:", data);
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setIsFormOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingProduct(null);
+    setIsFormOpen(true);
+  };
+
+  // Calculate real analytics data
+  const sortedByStock = [...products]
+    .sort((a, b) => Number(b.total_stock || 0) - Number(a.total_stock || 0))
+    .slice(0, 10);
+  
   const stockBarData = {
-    labels: ['Smart Camera', 'Wireless Mouse', 'RGB Keyboard', 'USB-C Charger', 'Gaming Headset'],
+    labels: sortedByStock.map(p => p.name),
     datasets: [
       {
-        label: 'Current Stock',
-        data: [15, 42, 8, 56, 12],
+        label: 'Total Stock Available',
+        data: sortedByStock.map(p => Number(p.total_stock || 0)),
         backgroundColor: 'rgba(29, 78, 216, 0.8)',
         borderRadius: 8,
       },
@@ -59,11 +67,14 @@ export default function ProductsPage() {
   };
 
   // Product Distribution per Category (Pie Chart)
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+  const categoryCounts = categories.map(cat => products.filter(p => p.category === cat).length);
+
   const categoryPieData = {
-    labels: ['Electronics', 'Accessories', 'Peripherals', 'Power', 'Audio'],
+    labels: categories.length > 0 ? categories : ['No Data'],
     datasets: [
       {
-        data: [35, 25, 15, 15, 10],
+        data: categoryCounts.length > 0 ? categoryCounts : [1],
         backgroundColor: [
           'rgba(29, 78, 216, 0.8)',
           'rgba(99, 102, 241, 0.8)',
@@ -76,13 +87,32 @@ export default function ProductsPage() {
     ],
   };
 
-  // Number of Products over Time (Line Chart)
+  // Real growth data based on created_at
+  const getGrowthData = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const labels = [];
+    const counts = [];
+    const now = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      labels.push(months[d.getMonth()]);
+      
+      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+      const count = products.filter(p => new Date(p.created_at) <= endOfMonth).length;
+      counts.push(count);
+    }
+    return { labels, counts };
+  };
+
+  const { labels: growthLabels, counts: growthCounts } = getGrowthData();
+
   const productsTimeLineData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: growthLabels,
     datasets: [
       {
-        label: 'Total Products',
-        data: [120, 135, 150, 175, 190, 215],
+        label: 'Total Catalog Size',
+        data: growthCounts,
         borderColor: 'rgba(29, 78, 216, 1)',
         backgroundColor: 'rgba(29, 78, 216, 0.1)',
         fill: true,
@@ -91,21 +121,43 @@ export default function ProductsPage() {
     ],
   };
 
-  const handleSendMessage = (e) => {
+  const [isAiThinking, setIsAiThinking] = useState(false);
+
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!chatMessage.trim()) return;
+    if (!chatMessage.trim() || isAiThinking) return;
 
-    const newUserMessage = { role: 'user', content: chatMessage };
-    setChatHistory([...chatHistory, newUserMessage]);
+    const userMsg = chatMessage;
+    const newUserMessage = { role: 'user', content: userMsg };
+    setChatHistory(prev => [...prev, newUserMessage]);
     setChatMessage('');
+    setIsAiThinking(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      setChatHistory(prev => [...prev, { 
-        role: 'assistant', 
-        content: `I am processing your request about "${chatMessage}". As a mock AI, I can tell you that your inventory is looking healthy!` 
-      }]);
-    }, 1000);
+    try {
+      const response = await fetch('/api/ai-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg,
+          context: products, // All products with total_stock and metadata
+          history: chatHistory.slice(-10) // Last 10 messages for context
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setChatHistory(prev => [...prev, { role: 'assistant', content: data.response }]);
+      } else {
+        setChatHistory(prev => [...prev, { 
+          role: 'assistant', 
+          content: "I'm sorry, I'm having trouble connecting to my brain right now. Please try again later." 
+        }]);
+      }
+    } catch (error) {
+      console.error("AI Error:", error);
+    } finally {
+      setIsAiThinking(false);
+    }
   };
 
   return (
@@ -152,27 +204,53 @@ export default function ProductsPage() {
 
           {/* Tab Content */}
           <div className="min-h-[600px]">
-            {activeTab === 'list' && <ProductList products={products} />}
-            {activeTab === 'analytics' && (
-              <ProductAnalytics 
-                stockBarData={stockBarData} 
-                categoryPieData={categoryPieData} 
-                productsTimeLineData={productsTimeLineData} 
-              />
-            )}
-            {activeTab === 'ai' && (
-              <AIAnalysis 
-                chatHistory={chatHistory} 
-                chatMessage={chatMessage} 
-                setChatMessage={setChatMessage} 
-                handleSendMessage={handleSendMessage} 
-                title="AI Product Analyst"
-                description="Ask anything about your product catalog and categories"
-              />
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+                <span className="ml-4 text-gray-500 font-medium">Loading products data...</span>
+              </div>
+            ) : (
+              <>
+                {activeTab === 'list' && (
+                  <ProductList 
+                    products={products} 
+                    onEdit={handleEdit} 
+                    onDelete={fetchProducts} 
+                    onAdd={handleAddNew}
+                  />
+                )}
+                {activeTab === 'analytics' && (
+                  <ProductAnalytics 
+                    stockBarData={stockBarData} 
+                    categoryPieData={categoryPieData} 
+                    productsTimeLineData={productsTimeLineData} 
+                  />
+                )}
+                {activeTab === 'ai' && (
+                  <AIAnalysis 
+                    chatHistory={chatHistory} 
+                    chatMessage={chatMessage} 
+                    setChatMessage={setChatMessage} 
+                    handleSendMessage={handleSendMessage} 
+                    isAiThinking={isAiThinking}
+                    title="AI Product Analyst"
+                    description="Ask anything about your product catalog and categories"
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
       </main>
+
+      {/* Product Form Modal (Rendered at root for absolute centering) */}
+      {isFormOpen && (
+        <ProductForm 
+          product={editingProduct} 
+          onClose={() => setIsFormOpen(false)} 
+          onSuccess={fetchProducts} 
+        />
+      )}
     </div>
   );
 }

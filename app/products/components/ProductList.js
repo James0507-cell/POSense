@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-export default function ProductList({ products }) {
+export default function ProductList({ products, onEdit, onDelete, onAdd }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -10,25 +10,51 @@ export default function ProductList({ products }) {
   const [maxPrice, setMaxPrice] = useState('');
   const [sortOrder, setSortOrder] = useState('date-desc');
 
+  const handleDelete = async (id) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      try {
+        const response = await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
+        if (response.ok) {
+          onDelete();
+        } else {
+          alert("Failed to delete product");
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+      }
+    }
+  };
+
   const filteredProducts = products.filter((p) => {
+    const name = p.name || '';
+    const id = p.id || '';
+    const brand = p.brand || '';
+    const createdAt = p.created_at || p.createdAt || '';
+    const sellingPrice = p.selling_price || p.sellingPrice || 0;
+
     const matchesSearch = 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.brand.toLowerCase().includes(searchTerm.toLowerCase());
+      name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      brand.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const productDate = new Date(p.created_at);
+    const productDate = new Date(createdAt);
     const matchesDateFrom = !dateFrom || productDate >= new Date(dateFrom);
     const matchesDateTo = !dateTo || productDate <= new Date(dateTo);
     
-    const matchesMinPrice = !minPrice || p.selling_price >= parseFloat(minPrice);
-    const matchesMaxPrice = !maxPrice || p.selling_price <= parseFloat(maxPrice);
+    const matchesMinPrice = !minPrice || sellingPrice >= parseFloat(minPrice);
+    const matchesMaxPrice = !maxPrice || sellingPrice <= parseFloat(maxPrice);
 
     return matchesSearch && matchesDateFrom && matchesDateTo && matchesMinPrice && matchesMaxPrice;
   }).sort((a, b) => {
-    if (sortOrder === 'date-desc') return new Date(b.created_at) - new Date(a.created_at);
-    if (sortOrder === 'date-asc') return new Date(a.created_at) - new Date(b.created_at);
-    if (sortOrder === 'price-desc') return b.selling_price - a.selling_price;
-    if (sortOrder === 'price-asc') return a.selling_price - b.selling_price;
+    const aCreatedAt = a.created_at || a.createdAt || '';
+    const bCreatedAt = b.created_at || b.createdAt || '';
+    const aSellingPrice = a.selling_price || a.sellingPrice || 0;
+    const bSellingPrice = b.selling_price || b.sellingPrice || 0;
+
+    if (sortOrder === 'date-desc') return new Date(bCreatedAt) - new Date(aCreatedAt);
+    if (sortOrder === 'date-asc') return new Date(aCreatedAt) - new Date(bCreatedAt);
+    if (sortOrder === 'price-desc') return bSellingPrice - aSellingPrice;
+    if (sortOrder === 'price-asc') return aSellingPrice - bSellingPrice;
     return 0;
   });
 
@@ -106,7 +132,10 @@ export default function ProductList({ products }) {
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-gray-100 flex items-center justify-between">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Product Inventory</h4>
-          <button className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100">
+          <button 
+            onClick={onAdd}
+            className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100"
+          >
             Add New Product
           </button>
         </div>
@@ -126,13 +155,14 @@ export default function ProductList({ products }) {
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Created By</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Updated By</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Date Added</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Last Updated</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filteredProducts.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
-                  <td className="px-6 py-5 font-bold text-blue-700 text-sm whitespace-nowrap">{p.id}</td>
+              {filteredProducts.map((p, index) => (
+                <tr key={p.product_id || p.id || index} className="hover:bg-gray-50/80 transition-colors">
+                  <td className="px-6 py-5 font-bold text-blue-700 text-sm whitespace-nowrap">{p.product_id || p.id}</td>
                   <td className="px-6 py-5 font-medium text-gray-700 text-sm whitespace-nowrap">{p.brand}</td>
                   <td className="px-6 py-5 font-bold text-gray-900 text-sm whitespace-nowrap">{p.name}</td>
                   <td className="px-6 py-5 text-gray-500 text-xs font-mono whitespace-nowrap">{p.barcode}</td>
@@ -142,16 +172,17 @@ export default function ProductList({ products }) {
                       {p.category}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-right font-medium text-gray-700 text-sm">${p.cost_price.toFixed(2)}</td>
-                  <td className="px-6 py-5 text-right font-bold text-gray-900 text-sm">${p.selling_price.toFixed(2)}</td>
-                  <td className="px-6 py-5 text-gray-500 text-sm">{(p.tax_rate * 100).toFixed(0)}%</td>
-                  <td className="px-6 py-5 text-gray-700 text-sm">{p.created_by}</td>
-                  <td className="px-6 py-5 text-gray-700 text-sm">{p.updated_by}</td>
-                  <td className="px-6 py-5 text-gray-400 text-xs">{p.created_at.split(' ')[0]}</td>
+                  <td className="px-6 py-5 text-right font-medium text-gray-700 text-sm">${Number(p.cost_price || p.costPrice || 0).toFixed(2)}</td>
+                  <td className="px-6 py-5 text-right font-bold text-gray-900 text-sm">${Number(p.selling_price || p.sellingPrice || 0).toFixed(2)}</td>
+                  <td className="px-6 py-5 text-gray-500 text-sm">{(Number(p.tax_rate || p.taxRate || 0) * 100).toFixed(0)}%</td>
+                  <td className="px-6 py-5 text-gray-700 text-sm">{p.created_by || p.createdBy}</td>
+                  <td className="px-6 py-5 text-gray-700 text-sm">{p.updated_by || p.updatedBy}</td>
+                  <td className="px-6 py-5 text-gray-400 text-xs">{(p.created_at || p.createdAt || '').split(' ')[0]}</td>
+                  <td className="px-6 py-5 text-gray-400 text-xs">{(p.updated_at || p.updatedAt || '').split(' ')[0]}</td>
                   <td className="px-6 py-5">
                     <div className="flex items-center justify-center gap-2">
                       <button 
-                        onClick={() => console.log('Update', p.id)}
+                        onClick={() => onEdit(p)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Update Product"
                       >
@@ -160,7 +191,7 @@ export default function ProductList({ products }) {
                         </svg>
                       </button>
                       <button 
-                        onClick={() => console.log('Delete', p.id)}
+                        onClick={() => handleDelete(p.product_id || p.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete Product"
                       >

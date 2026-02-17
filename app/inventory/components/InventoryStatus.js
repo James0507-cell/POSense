@@ -11,24 +11,36 @@ export default function InventoryStatus({ inventoryData, metrics }) {
   const [sortOrder, setSortOrder] = useState('date-desc');
 
   const filteredInventory = inventoryData.filter((item) => {
+    const productId = item.productId || item.product_id || '';
+    const id = item.id || '';
+    const location = item.location || '';
+    const quantity = item.quantity || 0;
+    const threshold = item.threshold || 0;
+    const lastUpdated = item.lastUpdated || item.last_updated || '';
+
     const matchesSearch = 
-      item.productId.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchTerm.toLowerCase());
+      productId.toString().toLowerCase().includes(searchTerm.toLowerCase()) || 
+      id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      location.toString().toLowerCase().includes(searchTerm.toLowerCase());
     
-    const itemDate = new Date(item.lastUpdated);
+    const itemDate = new Date(lastUpdated);
     const matchesDateFrom = !dateFrom || itemDate >= new Date(dateFrom);
     const matchesDateTo = !dateTo || itemDate <= new Date(dateTo);
     
-    const matchesMinQty = !minQty || item.quantity >= parseInt(minQty);
-    const matchesMaxQty = !maxQty || item.quantity <= parseInt(maxQty);
+    const matchesMinQty = !minQty || quantity >= parseInt(minQty);
+    const matchesMaxQty = !maxQty || quantity <= parseInt(maxQty);
 
     return matchesSearch && matchesDateFrom && matchesDateTo && matchesMinQty && matchesMaxQty;
   }).sort((a, b) => {
-    if (sortOrder === 'date-desc') return new Date(b.lastUpdated) - new Date(a.lastUpdated);
-    if (sortOrder === 'date-asc') return new Date(a.lastUpdated) - new Date(b.lastUpdated);
-    if (sortOrder === 'qty-desc') return b.quantity - a.quantity;
-    if (sortOrder === 'qty-asc') return a.quantity - b.quantity;
+    const aLastUpdated = a.lastUpdated || a.last_updated || '';
+    const bLastUpdated = b.lastUpdated || b.last_updated || '';
+    const aQuantity = a.quantity || 0;
+    const bQuantity = b.quantity || 0;
+
+    if (sortOrder === 'date-desc') return new Date(bLastUpdated) - new Date(aLastUpdated);
+    if (sortOrder === 'date-asc') return new Date(aLastUpdated) - new Date(bLastUpdated);
+    if (sortOrder === 'qty-desc') return bQuantity - aQuantity;
+    if (sortOrder === 'qty-asc') return aQuantity - bQuantity;
     return 0;
   });
 
@@ -139,27 +151,33 @@ export default function InventoryStatus({ inventoryData, metrics }) {
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Inventory ID</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Product ID</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Location</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Quantity</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Minimum</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Threshold</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Quantity</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Created By</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Date Added</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Updated By</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Last Updated</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filteredInventory.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
-                  <td className="px-6 py-5 font-bold text-blue-700 text-sm whitespace-nowrap">{item.id}</td>
-                  <td className="px-6 py-5 font-medium text-gray-700 text-sm whitespace-nowrap">{item.productId}</td>
+              {filteredInventory.map((item, index) => (
+                <tr key={item.inventory_id || item.id || index} className="hover:bg-gray-50/80 transition-colors">
+                  <td className="px-6 py-5 font-bold text-blue-700 text-sm whitespace-nowrap">{item.inventory_id || item.id}</td>
+                  <td className="px-6 py-5 font-medium text-gray-700 text-sm whitespace-nowrap">{item.productId || item.product_id}</td>
                   <td className="px-6 py-5 text-gray-700 text-sm whitespace-nowrap">{item.location}</td>
+                  <td className="px-6 py-5 text-right font-medium text-gray-500 text-sm">{item.minimum}</td>
+                  <td className="px-6 py-5 text-right font-medium text-gray-500 text-sm">{item.maximum}</td>
                   <td className="px-6 py-5 text-right">
-                    <span className={`font-bold text-sm ${item.quantity <= item.threshold ? 'text-red-600' : 'text-gray-900'}`}>
+                    <span className={`font-bold text-sm ${(item.quantity || 0) <= (item.minimum || item.threshold || 0) ? 'text-red-600' : 'text-gray-900'}`}>
                       {item.quantity}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-right font-medium text-gray-500 text-sm">{item.threshold}</td>
-                  <td className="px-6 py-5 text-gray-700 text-sm">{item.updatedBy}</td>
-                  <td className="px-6 py-5 text-gray-400 text-xs whitespace-nowrap">{item.lastUpdated}</td>
+                  <td className="px-6 py-5 text-gray-700 text-sm">{item.createdBy || item.created_by}</td>
+                  <td className="px-6 py-5 text-gray-400 text-xs whitespace-nowrap">{(item.createdAt || item.created_at || '').split(' ')[0]}</td>
+                  <td className="px-6 py-5 text-gray-700 text-sm">{item.updatedBy || item.updated_by}</td>
+                  <td className="px-6 py-5 text-gray-400 text-xs whitespace-nowrap">{item.lastUpdated || item.last_updated}</td>
                   <td className="px-6 py-5">
                     <div className="flex items-center justify-center gap-2">
                       <button 
@@ -184,7 +202,7 @@ export default function InventoryStatus({ inventoryData, metrics }) {
               ))}
               {filteredInventory.length === 0 && (
                 <tr>
-                  <td colSpan="8" className="px-6 py-10 text-center text-gray-500 font-medium">
+                  <td colSpan="9" className="px-6 py-10 text-center text-gray-500 font-medium">
                     No inventory records found matching your filters.
                   </td>
                 </tr>

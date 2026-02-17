@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, handleSendMessage, title = "AI Business Analyst", description = "Ask anything about your business data" }) {
+export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, handleSendMessage, isAiThinking, title = "AI Business Analyst", description = "Ask anything about your business data" }) {
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm h-[600px] flex flex-col overflow-hidden">
       <div className="p-8 border-b border-gray-100">
@@ -27,10 +27,19 @@ export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, h
               ? 'bg-blue-700 text-white rounded-tr-none' 
               : 'bg-white text-gray-900 border border-gray-100 rounded-tl-none'
             }`}>
-              {msg.content}
+              <div className="whitespace-pre-wrap">{msg.content}</div>
             </div>
           </div>
         ))}
+        {isAiThinking && (
+          <div className="flex justify-start">
+            <div className="bg-white text-gray-900 border border-gray-100 p-4 rounded-2xl rounded-tl-none text-sm font-medium shadow-sm flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
+              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.5s]"></div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-8 border-t border-gray-100 bg-white">
@@ -40,13 +49,15 @@ export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, h
             value={chatMessage}
             onChange={(e) => setChatMessage(e.target.value)}
             placeholder="Type your question here..."
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-700/20 focus:border-blue-700 transition-all"
+            disabled={isAiThinking}
+            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-700/20 focus:border-blue-700 transition-all disabled:opacity-50"
           />
           <button 
             type="submit"
-            className="bg-blue-700 text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-all active:scale-[0.98] shadow-lg shadow-blue-100"
+            disabled={isAiThinking || !chatMessage.trim()}
+            className="bg-blue-700 text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-all active:scale-[0.98] shadow-lg shadow-blue-100 disabled:opacity-50"
           >
-            Send
+            {isAiThinking ? '...' : 'Send'}
           </button>
         </form>
       </div>

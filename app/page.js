@@ -27,6 +27,15 @@ const LoginPage = () => {
             alert('Login failed. Please check your credentials and try again.');
             return;
         } else {
+            const data = await response.json();
+            // The API returns an array of employees
+            if (data && data.length > 0) {
+                const employee = data[0];
+                sessionStorage.setItem('employee_id', employee.employee_id);
+                sessionStorage.setItem('first_name', employee.first_name);
+                sessionStorage.setItem('last_name', employee.last_name);
+                sessionStorage.setItem('email', employee.email);
+            }
             router.push('/dashboard');
         }
 

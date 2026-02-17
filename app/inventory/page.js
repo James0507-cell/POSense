@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SideBar from '../components/sideBar.js';
 import InventoryStatus from './components/InventoryStatus';
 import InventoryAnalytics from './components/InventoryAnalytics';
@@ -13,78 +13,96 @@ export default function InventoryPage() {
     { role: 'assistant', content: 'Hello! I am your AI inventory analyst. How can I help you with your stock today?' }
   ]);
 
-  // Mock Inventory Data
-  const inventoryData = [
-    {
-      id: 'INV-001',
-      productId: 'PROD-001',
-      location: 'Warehouse A',
-      quantity: 15,
-      threshold: 10,
-      updatedBy: 'Admin',
-      lastUpdated: '2025-02-15 08:30:00'
-    },
-    {
-      id: 'INV-002',
-      productId: 'PROD-002',
-      location: 'Main Store',
-      quantity: 5,
-      threshold: 15,
-      updatedBy: 'Manager',
-      lastUpdated: '2025-02-16 11:20:00'
-    },
-    {
-      id: 'INV-003',
-      productId: 'PROD-003',
-      location: 'Warehouse B',
-      quantity: 0,
-      threshold: 5,
-      updatedBy: 'Admin',
-      lastUpdated: '2025-02-17 09:45:00'
-    },
-  ];
+  const [inventoryData, setInventoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchInventory() {
+      try {
+        const response = await fetch('/api/inventory');
+        if (response.ok) {
+          const data = await response.json();
+          setInventoryData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching inventory:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchInventory();
+  }, []);
 
   // Metrics Calculation
   const metrics = {
-    totalStocks: inventoryData.reduce((acc, item) => acc + item.quantity, 0),
-    lowStock: inventoryData.filter(item => item.quantity > 0 && item.quantity <= item.threshold).length,
-    outOfStock: inventoryData.filter(item => item.quantity === 0).length,
+    totalStocks: inventoryData.reduce((acc, item) => acc + (item.quantity || 0), 0),
+    lowStock: inventoryData.filter(item => (item.quantity || 0) > 0 && (item.quantity || 0) <= (item.minimum || item.threshold || 0)).length,
+    outOfStock: inventoryData.filter(item => (item.quantity || 0) === 0).length,
   };
 
-  // Chart Data for Stock vs Threshold
+  // Chart Data for Stock vs Threshold (Maximum)
   const chartData = {
-    labels: inventoryData.map(item => item.productId),
+    labels: inventoryData.map(item => item.productId || item.product_id),
     datasets: [
       {
         label: 'Current Quantity',
-        data: inventoryData.map(item => item.quantity),
+        data: inventoryData.map(item => item.quantity || 0),
         backgroundColor: 'rgba(29, 78, 216, 0.8)',
         borderRadius: 8,
       },
       {
-        label: 'Threshold Level',
-        data: inventoryData.map(item => item.threshold),
+        label: 'Minimum Level',
+        data: inventoryData.map(item => item.minimum || 0),
+        backgroundColor: 'rgba(239, 68, 68, 0.5)',
+        borderRadius: 8,
+      },
+      {
+        label: 'Maximum (Threshold)',
+        data: inventoryData.map(item => item.maximum || item.threshold || 0),
         backgroundColor: 'rgba(209, 213, 219, 0.8)',
         borderRadius: 8,
       }
     ],
   };
 
-  const handleSendMessage = (e) => {
+  const [isAiThinking, setIsAiThinking] = useState(false);
+
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!chatMessage.trim()) return;
+    if (!chatMessage.trim() || isAiThinking) return;
 
-    const newUserMessage = { role: 'user', content: chatMessage };
-    setChatHistory([...chatHistory, newUserMessage]);
+    const userMsg = chatMessage;
+    const newUserMessage = { role: 'user', content: userMsg };
+    setChatHistory(prev => [...prev, newUserMessage]);
     setChatMessage('');
+    setIsAiThinking(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      setChatHistory(prev => [...prev, { 
-        role: 'assistant', 
-        content: `Analyzing inventory for "${chatMessage}"... It seems you have ${metrics.lowStock} items low on stock. Would you like me to generate a restock report?` 
-      }]);
-    }, 1000);
+    try {
+      const response = await fetch('/api/ai-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg,
+          context: inventoryData, 
+          history: chatHistory.slice(-10) 
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setChatHistory(prev => [...prev, { role: 'assistant', content: data.response }]);
+      } else {
+        setChatHistory(prev => [...prev, { 
+          role: 'assistant', 
+          content: "I'm sorry, I'm having trouble analyzing your inventory right now. Please try again." 
+        }]);
+      }
+    } catch (error) {
+      console.error("AI Error:", error);
+    } finally {
+      setIsAiThinking(false);
+    }
   };
 
   return (
@@ -131,17 +149,27 @@ export default function InventoryPage() {
 
           {/* Tab Content */}
           <div className="min-h-[600px]">
-            {activeTab === 'status' && <InventoryStatus inventoryData={inventoryData} metrics={metrics} />}
-            {activeTab === 'analytics' && <InventoryAnalytics chartData={chartData} />}
-            {activeTab === 'ai' && (
-              <AIAnalysis 
-                chatHistory={chatHistory} 
-                chatMessage={chatMessage} 
-                setChatMessage={setChatMessage} 
-                handleSendMessage={handleSendMessage} 
-                title="AI Inventory Analyst"
-                description="Ask anything about stock levels, locations, and thresholds"
-              />
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+                <span className="ml-4 text-gray-500 font-medium">Loading inventory data...</span>
+              </div>
+            ) : (
+              <>
+                {activeTab === 'status' && <InventoryStatus inventoryData={inventoryData} metrics={metrics} />}
+                {activeTab === 'analytics' && <InventoryAnalytics chartData={chartData} />}
+                {activeTab === 'ai' && (
+                  <AIAnalysis 
+                    chatHistory={chatHistory} 
+                    chatMessage={chatMessage} 
+                    setChatMessage={setChatMessage} 
+                    handleSendMessage={handleSendMessage} 
+                    isAiThinking={isAiThinking}
+                    title="AI Inventory Analyst"
+                    description="Ask anything about stock levels, locations, and thresholds"
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
