@@ -1,21 +1,50 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function InventoryStatus({ inventoryData, metrics }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [minQty, setMinQty] = useState('');
+  const [maxQty, setMaxQty] = useState('');
+  const [sortOrder, setSortOrder] = useState('date-desc');
+
+  const filteredInventory = inventoryData.filter((item) => {
+    const matchesSearch = 
+      item.productId.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.location.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const itemDate = new Date(item.lastUpdated);
+    const matchesDateFrom = !dateFrom || itemDate >= new Date(dateFrom);
+    const matchesDateTo = !dateTo || itemDate <= new Date(dateTo);
+    
+    const matchesMinQty = !minQty || item.quantity >= parseInt(minQty);
+    const matchesMaxQty = !maxQty || item.quantity <= parseInt(maxQty);
+
+    return matchesSearch && matchesDateFrom && matchesDateTo && matchesMinQty && matchesMaxQty;
+  }).sort((a, b) => {
+    if (sortOrder === 'date-desc') return new Date(b.lastUpdated) - new Date(a.lastUpdated);
+    if (sortOrder === 'date-asc') return new Date(a.lastUpdated) - new Date(b.lastUpdated);
+    if (sortOrder === 'qty-desc') return b.quantity - a.quantity;
+    if (sortOrder === 'qty-asc') return a.quantity - b.quantity;
+    return 0;
+  });
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Metrics Cards */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
-          { label: 'Total Stocks', value: metrics.totalStocks, icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', color: 'blue' },
-          { label: 'Low Stock Alert', value: metrics.lowStock, icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', color: 'orange' },
-          { label: 'Out of Stock', value: metrics.outOfStock, icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636', color: 'red' },
+          { label: 'Total Stocks', value: metrics.totalStocks, icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', bgColor: 'bg-blue-50', hoverBg: 'group-hover:bg-blue-100', textColor: 'text-blue-700' },
+          { label: 'Low Stock Alert', value: metrics.lowStock, icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', bgColor: 'bg-orange-50', hoverBg: 'group-hover:bg-orange-100', textColor: 'text-orange-700' },
+          { label: 'Out of Stock', value: metrics.outOfStock, icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636', bgColor: 'bg-red-50', hoverBg: 'group-hover:bg-red-100', textColor: 'text-red-700' },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
             <div className="flex items-center justify-between mb-5">
-              <div className={`p-3 rounded-2xl bg-${stat.color}-50 group-hover:bg-${stat.color}-100 transition-colors`}>
-                <svg className={`w-6 h-6 text-${stat.color}-700`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className={`p-3 rounded-2xl ${stat.bgColor} ${stat.hoverBg} transition-colors`}>
+                <svg className={`w-6 h-6 ${stat.textColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={stat.icon} />
                 </svg>
               </div>
@@ -24,6 +53,75 @@ export default function InventoryStatus({ inventoryData, metrics }) {
             <p className="text-3xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">{stat.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Filters Bar */}
+      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* Search */}
+          <div className="relative lg:col-span-2">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Search by ID, Product ID or Location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+            />
+          </div>
+
+          {/* Date Range */}
+          <div className="flex gap-2 lg:col-span-2">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+            />
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+            />
+          </div>
+
+          {/* Quantity Range */}
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Min Qty"
+              value={minQty}
+              onChange={(e) => setMinQty(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+            />
+            <input
+              type="number"
+              placeholder="Max Qty"
+              value={maxQty}
+              onChange={(e) => setMaxQty(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+            />
+          </div>
+
+          {/* Sort Order */}
+          <div>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all cursor-pointer"
+            >
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="qty-desc">Qty: High to Low</option>
+              <option value="qty-asc">Qty: Low to High</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Inventory Table */}
@@ -49,7 +147,7 @@ export default function InventoryStatus({ inventoryData, metrics }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {inventoryData.map((item) => (
+              {filteredInventory.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
                   <td className="px-6 py-5 font-bold text-blue-700 text-sm whitespace-nowrap">{item.id}</td>
                   <td className="px-6 py-5 font-medium text-gray-700 text-sm whitespace-nowrap">{item.productId}</td>
@@ -84,6 +182,13 @@ export default function InventoryStatus({ inventoryData, metrics }) {
                   </td>
                 </tr>
               ))}
+              {filteredInventory.length === 0 && (
+                <tr>
+                  <td colSpan="8" className="px-6 py-10 text-center text-gray-500 font-medium">
+                    No inventory records found matching your filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

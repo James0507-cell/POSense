@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import SideBar from '../components/sideBar.js';
 import ProductList from './components/ProductList';
 import ProductAnalytics from './components/ProductAnalytics';
-import AIAnalysis from './components/AIAnalysis';
+import AIAnalysis from '../components/AIAnalysis';
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState('list');
@@ -166,6 +166,8 @@ export default function ProductsPage() {
                 chatMessage={chatMessage} 
                 setChatMessage={setChatMessage} 
                 handleSendMessage={handleSendMessage} 
+                title="AI Product Analyst"
+                description="Ask anything about your product catalog and categories"
               />
             )}
           </div>

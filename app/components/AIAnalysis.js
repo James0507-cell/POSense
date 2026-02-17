@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, handleSendMessage }) {
+export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, handleSendMessage, title = "AI Business Analyst", description = "Ask anything about your business data" }) {
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm h-[600px] flex flex-col overflow-hidden">
       <div className="p-8 border-b border-gray-100">
@@ -13,8 +13,8 @@ export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, h
             </svg>
           </div>
           <div>
-            <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">AI Inventory Analyst</h4>
-            <p className="text-sm text-gray-500 font-medium">Ask anything about your products and stock</p>
+            <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">{title}</h4>
+            <p className="text-sm text-gray-500 font-medium">{description}</p>
           </div>
         </div>
       </div>
@@ -39,7 +39,7 @@ export default function AIAnalysis({ chatHistory, chatMessage, setChatMessage, h
             type="text"
             value={chatMessage}
             onChange={(e) => setChatMessage(e.target.value)}
-            placeholder="Type your question here... (e.g., Which products are low on stock?)"
+            placeholder="Type your question here..."
             className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-6 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-700/20 focus:border-blue-700 transition-all"
           />
           <button 

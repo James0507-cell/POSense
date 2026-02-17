@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import SideBar from '../components/sideBar.js';
 import InventoryStatus from './components/InventoryStatus';
 import InventoryAnalytics from './components/InventoryAnalytics';
-import AIAnalysis from '../products/components/AIAnalysis'; // Reusing AI component
+import AIAnalysis from '../components/AIAnalysis';
 
 export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState('status');
@@ -139,6 +139,8 @@ export default function InventoryPage() {
                 chatMessage={chatMessage} 
                 setChatMessage={setChatMessage} 
                 handleSendMessage={handleSendMessage} 
+                title="AI Inventory Analyst"
+                description="Ask anything about stock levels, locations, and thresholds"
               />
             )}
           </div>
