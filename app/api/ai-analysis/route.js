@@ -1,32 +1,21 @@
 import { NextResponse } from 'next/server';
+import { SYSTEM_PROMPT } from './prompts.js';
 
 export async function POST(request) {
     try {
         const { message, context, history } = await request.json();
-        const apiKey = "AIzaSyD5gCmAenHXfTbScPqC09PEb-4FR0X_ilE";
+        const apiKey = process.env.GEMINI_API_KEY;
         
-        // Using Gemini 2.0 Flash Lite Preview (as requested or latest available flash lite)
-        const model = "gemini-2.0-flash-lite-preview-02-05";
+        // Using Gemini 2.0 Flash Lite Preview as requested
+        const model = "gemini-2.5-flash-lite";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-        const systemPrompt = `You are an AI Business Analyst for POSense, a modern Point of Sale and Inventory Management system.
-Your goal is to provide deep insights based on the provided business data (products and inventory).
-
-DATA CONTEXT:
-${JSON.stringify(context, null, 2)}
-
-INSTRUCTIONS:
-1. Use the provided context to answer questions accurately.
-2. If asked about stock levels, check the 'total_stock' and 'minimum' values.
-3. If asked about growth, refer to 'created_at' dates.
-4. Be concise, professional, and data-driven.
-5. If data is missing for a specific query, state it clearly.
-6. Use formatting (bolding, lists) to make insights readable.`;
+        const fullSystemContext = `${SYSTEM_PROMPT}\n\nCURRENT BUSINESS CONTEXT DATA (USE THIS TO ANSWER):\n${JSON.stringify(context, null, 2)}`;
 
         const contents = [
             {
                 role: "user",
-                parts: [{ text: systemPrompt }]
+                parts: [{ text: fullSystemContext }]
             },
             ...history.map(msg => ({
                 role: msg.role === 'user' ? 'user' : 'model',
