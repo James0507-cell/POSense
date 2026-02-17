@@ -1,29 +1,32 @@
-const mysql = require("mysql2/promise");
+import mysql from 'mysql2/promise';
 
-let connection;
+let pool;
 
-async function dbConnect() {
-    connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'posense'
+export async function dbConnect() {
+    if (pool) return pool;
+
+    pool = mysql.createPool({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
     });
-    console.log("Database connected");
+    
+    console.log("Database pool created");
+    return pool;
 }
 
-async function displayRecords (SQLQuery) {
-    if (connection) {
-        const [rows, fields] = await connection.query(SQLQuery);
-        return rows;
-    }
-    throw new Error("Database not connected");
+export async function displayRecords(SQLQuery, params = []) {
+    const db = await dbConnect();
+    const [rows] = await db.execute(SQLQuery, params);
+    return rows;
 }
 
-async function sqlManager (SQLQuery) {
-    if (connection) {
-        const [result] = await connection.query(SQLQuery);
-        return result;
-    }
+export async function sqlManager(SQLQuery, params = []) {
+    const db = await dbConnect();
+    const [result] = await db.execute(SQLQuery, params);
+    return result;
 }
-module.exports = { dbConnect, displayRecords, sqlManager };
