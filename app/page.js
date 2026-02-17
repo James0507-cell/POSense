@@ -6,9 +6,30 @@ import { useRouter } from 'next/navigation';
 const LoginPage = () => {
     const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        router.push('/dashboard');
+
+        const formData = new FormData(e.target);
+        const usernameValue = formData.get('username');
+        const passwordValue = formData.get('password');
+
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: usernameValue,
+                passwordHash: passwordValue
+            }),
+        })
+        if (!response.ok) {
+            alert('Login failed. Please check your credentials and try again.');
+            return;
+        } else {
+            router.push('/dashboard');
+        }
+
     };
 
     return (
@@ -83,13 +104,14 @@ const LoginPage = () => {
 
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide" htmlFor="email">
+                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide" htmlFor="username">
                                 Email Address
                             </label>
                             <input
-                                id="email"
-                                type="email"
-                                placeholder="manager@yourstore.com"
+                                id="username"
+                                name="username"
+                                type="text"
+                                placeholder="james.santiago"
                                 className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400"
                                 required
                             />
@@ -106,6 +128,7 @@ const LoginPage = () => {
                             </div>
                             <input
                                 id="password"
+                                name="password"
                                 type="password"
                                 placeholder="••••••••"
                                 className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400"
