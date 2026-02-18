@@ -6,8 +6,7 @@ export async function POST(request) {
         const { message, context, history } = await request.json();
         const apiKey = process.env.GEMINI_API_KEY;
         
-        // Using Gemini 2.0 Flash Lite Preview as requested
-        const model = "gemini-2.5-flash-lite";
+        const model = "gemini-2.5-flash";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         const fullSystemContext = `${SYSTEM_PROMPT}\n\nCURRENT BUSINESS CONTEXT DATA (USE THIS TO ANSWER):\n${JSON.stringify(context, null, 2)}`;

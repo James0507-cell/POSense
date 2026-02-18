@@ -18,9 +18,7 @@ export async function displayRecords(tableName, queryOptions = {}) {
     return data;
 }
 
-/**
- * Placeholder for SQL manager to perform INSERT/UPDATE/DELETE.
- */
+
 export async function sqlManager(tableName, operation, data, match = {}) {
     let query;
     if (operation === 'INSERT') {
