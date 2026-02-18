@@ -1,26 +1,37 @@
-import mysql from 'mysql2/promise';
+import { createClient } from '@supabase/supabase-js';
 
-let connection;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-async function dbConnect() {
-    connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'posense'
-    });
-    console.log("Database connected");
-    return connection;
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
+
+export async function displayRecords(tableName, queryOptions = {}) {
+    let query = supabase.from(tableName).select(queryOptions.select || '*');
+    
+    if (queryOptions.order) {
+        query = query.order(queryOptions.order.column, { ascending: queryOptions.order.ascending });
+    }
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
 }
 
-export async function displayRecords(SQLQuery, params = []) {
-    const db = await dbConnect();
-    const [rows] = await db.execute(SQLQuery, params);
-    return rows;
-}
-
-export async function sqlManager(SQLQuery, params = []) {
-    const db = await dbConnect();
-    const [result] = await db.execute(SQLQuery, params);
+/**
+ * Placeholder for SQL manager to perform INSERT/UPDATE/DELETE.
+ */
+export async function sqlManager(tableName, operation, data, match = {}) {
+    let query;
+    if (operation === 'INSERT') {
+        query = supabase.from(tableName).insert(data).select();
+    } else if (operation === 'UPDATE') {
+        query = supabase.from(tableName).update(data).match(match).select();
+    } else if (operation === 'DELETE') {
+        query = supabase.from(tableName).delete().match(match);
+    }
+    
+    const { data: result, error } = await query;
+    if (error) throw error;
     return result;
 }

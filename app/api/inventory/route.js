@@ -1,20 +1,27 @@
 import { NextResponse } from 'next/server';
-import { displayRecords, sqlManager } from '../../dbManager.js';
+import { supabase } from '../../dbManager.js';
 
 export async function GET() {
     try {
-        const inventory = await displayRecords(`
-            SELECT 
-                i.*, 
-                i.inventory_id,
-                p.name as product_name 
-            FROM inventory i
-            LEFT JOIN products p ON i.product_id = p.product_id
-            ORDER BY i.last_updated DESC
-        `);
+        const { data, error } = await supabase
+            .from('inventory')
+            .select(`
+                *,
+                product:products(name)
+            `)
+            .order('last_updated', { ascending: false });
+
+        if (error) throw error;
+
+        // Map product name to product_name key
+        const inventory = data.map(item => ({
+            ...item,
+            product_name: item.product?.name || null
+        }));
+
         return NextResponse.json(inventory);
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in GET /api/inventory:", error);
         return NextResponse.json(
             { error: "Failed to fetch inventory" },
             { status: 500 }
@@ -27,14 +34,29 @@ export async function POST(request) {
         const body = await request.json();
         const { product_id, location, quantity, minimum, maximum, created_by } = body;
         
-        const result = await sqlManager(
-            "INSERT INTO inventory (product_id, location, quantity, minimum, maximum, created_by, last_updated) VALUES (?, ?, ?, ?, ?, ?, NOW())",
-            [product_id, location, Number(quantity), Number(minimum), Number(maximum), created_by]
-        );
+        const { data, error } = await supabase
+            .from('inventory')
+            .insert([
+                { 
+                    product_id, 
+                    location, 
+                    quantity: Number(quantity), 
+                    minimum: Number(minimum), 
+                    maximum: Number(maximum), 
+                    created_by,
+                    last_updated: new Date().toISOString()
+                }
+            ])
+            .select('inventory_id');
+
+        if (error) throw error;
         
-        return NextResponse.json({ message: "Inventory record created successfully", id: result.insertId });
+        return NextResponse.json({ 
+            message: "Inventory record created successfully", 
+            id: data[0].inventory_id 
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in POST /api/inventory:", error);
         return NextResponse.json({ error: "Failed to create inventory record" }, { status: 500 });
     }
 }
@@ -44,14 +66,25 @@ export async function PUT(request) {
         const body = await request.json();
         const { inventory_id, product_id, location, quantity, minimum, maximum, updated_by } = body;
 
-        await sqlManager(
-            "UPDATE inventory SET product_id=?, location=?, quantity=?, minimum=?, maximum=?, updated_by=?, last_updated=NOW() WHERE inventory_id=?",
-            [product_id, location, Number(quantity), Number(minimum), Number(maximum), updated_by, inventory_id]
-        );
+        const { data, error } = await supabase
+            .from('inventory')
+            .update({ 
+                product_id, 
+                location, 
+                quantity: Number(quantity), 
+                minimum: Number(minimum), 
+                maximum: Number(maximum), 
+                updated_by, 
+                last_updated: new Date().toISOString() 
+            })
+            .eq('inventory_id', inventory_id)
+            .select();
+
+        if (error) throw error;
         
         return NextResponse.json({ message: "Inventory record updated successfully" });
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in PUT /api/inventory:", error);
         return NextResponse.json({ error: "Failed to update inventory record" }, { status: 500 });
     }
 }
@@ -61,10 +94,18 @@ export async function DELETE(request) {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
         
-        await sqlManager("DELETE FROM inventory WHERE inventory_id=?", [id]);
+        if (!id) throw new Error("Inventory ID is required");
+
+        const { error } = await supabase
+            .from('inventory')
+            .delete()
+            .eq('inventory_id', id);
+
+        if (error) throw error;
+
         return NextResponse.json({ message: "Inventory record deleted successfully" });
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in DELETE /api/inventory:", error);
         return NextResponse.json({ error: "Failed to delete inventory record" }, { status: 500 });
     }
 }

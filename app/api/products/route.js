@@ -1,31 +1,30 @@
 import { NextResponse } from 'next/server';
-import { displayRecords, sqlManager } from '../../dbManager.js';
+import { supabase } from '../../dbManager.js';
 
 export async function GET() {
     try {
-        const products = await displayRecords(`
-            SELECT 
-                p.product_id, 
-                (select name from brands where brand_id = p.brand_id) as brand, 
-                p.brand_id, 
-                name, 
-                barcode, 
-                description, 
-                category, 
-                cost_price, 
-                selling_price, 
-                tax_rate, 
-                created_at, 
-                created_by, 
-                updated_at, 
-                updated_by,
-                (SELECT SUM(quantity) FROM inventory WHERE product_id = p.product_id) as total_stock
-            FROM products p 
-            ORDER BY created_at DESC
-        `);
+        // Fetch products with their brand name and inventory quantities
+        const { data, error } = await supabase
+            .from('products')
+            .select(`
+                *,
+                brand:brands(name),
+                inventory(quantity)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Map the results to match the previous structure
+        const products = data.map(p => ({
+            ...p,
+            brand: p.brand?.name || null,
+            total_stock: p.inventory?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0
+        }));
+
         return NextResponse.json(products);
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in GET /api/products:", error);
         return NextResponse.json(
             { error: "Failed to fetch products" },
             { status: 500 }
@@ -36,17 +35,34 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json();
-        console.log("POST Body received:", body);
         const { brand_id, name, barcode, description, category, cost_price, selling_price, tax_rate, created_by } = body;
         
-        const result = await sqlManager(
-            "INSERT INTO products (brand_id, name, barcode, description, category, cost_price, selling_price, tax_rate, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
-            [brand_id, name, barcode, description, category, Number(cost_price), Number(selling_price), Number(tax_rate), created_by]
-        );
+        const { data, error } = await supabase
+            .from('products')
+            .insert([
+                { 
+                    brand_id, 
+                    name, 
+                    barcode, 
+                    description, 
+                    category, 
+                    cost_price: Number(cost_price), 
+                    selling_price: Number(selling_price), 
+                    tax_rate: Number(tax_rate), 
+                    created_by,
+                    created_at: new Date().toISOString()
+                }
+            ])
+            .select('product_id');
+
+        if (error) throw error;
         
-        return NextResponse.json({ message: "Product created successfully", id: result.insertId });
+        return NextResponse.json({ 
+            message: "Product created successfully", 
+            id: data[0].product_id 
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in POST /api/products:", error);
         return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
     }
 }
@@ -54,17 +70,30 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const body = await request.json();
-        console.log("PUT Body received:", body);
         const { product_id, brand_id, name, barcode, description, category, cost_price, selling_price, tax_rate, updated_by } = body;
 
-        await sqlManager(
-            "UPDATE products SET brand_id=?, name=?, barcode=?, description=?, category=?, cost_price=?, selling_price=?, tax_rate=?, updated_by=?, updated_at=NOW() WHERE product_id=?",
-            [brand_id, name, barcode, description, category, Number(cost_price), Number(selling_price), Number(tax_rate), updated_by, product_id]
-        );
+        const { data, error } = await supabase
+            .from('products')
+            .update({ 
+                brand_id, 
+                name, 
+                barcode, 
+                description, 
+                category, 
+                cost_price: Number(cost_price), 
+                selling_price: Number(selling_price), 
+                tax_rate: Number(tax_rate), 
+                updated_by, 
+                updated_at: new Date().toISOString() 
+            })
+            .eq('product_id', product_id)
+            .select();
+
+        if (error) throw error;
         
         return NextResponse.json({ message: "Product updated successfully" });
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in PUT /api/products:", error);
         return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
     }
 }
@@ -74,10 +103,18 @@ export async function DELETE(request) {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
         
-        await sqlManager("DELETE FROM products WHERE product_id=?", [id]);
+        if (!id) throw new Error("Product ID is required");
+
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('product_id', id);
+
+        if (error) throw error;
+
         return NextResponse.json({ message: "Product deleted successfully" });
     } catch (error) {
-        console.error(error);
+        console.error("Supabase error in DELETE /api/products:", error);
         return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
     }
 }
