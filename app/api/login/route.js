@@ -22,7 +22,6 @@ export async function POST(request) {
             return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
         }
         
-        // Map data to match the expected format
         const employees = credentials.map(ec => ({
             credential_id: ec.credential_id,
             employee_id: ec.employee_id,

@@ -15,7 +15,6 @@ export async function GET() {
 
         if (error) throw error;
 
-        // Map the results to match the previous structure
         const products = data.map(p => ({
             ...p,
             brand: p.brand?.name || null,

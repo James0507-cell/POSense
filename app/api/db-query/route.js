@@ -19,7 +19,6 @@ export async function GET(request) {
 
         let result;
 
-        // Handle specific queries used in the frontend
         if (lowerQuery.includes('from brands')) {
             const { data, error } = await supabase.from('brands').select('brand_id, name');
             if (error) throw error;

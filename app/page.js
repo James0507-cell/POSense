@@ -43,9 +43,7 @@ const LoginPage = () => {
 
     return (
         <div className="flex min-h-screen bg-gray-50 font-[family-name:var(--font-inter)]">
-            {/* Left side - Branding & Description with Dynamic Background */}
             <div className="hidden lg:flex flex-col justify-center items-center w-1/2 relative overflow-hidden bg-blue-900 text-white p-16">
-                {/* Background Design Elements */}
                 <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none">
                     <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-400 rounded-full blur-3xl animate-pulse"></div>
                     <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
@@ -84,7 +82,6 @@ const LoginPage = () => {
                 </div>
             </div>
 
-            {/* Right side - Login Form with subtle patterns */}
             <div className="flex flex-col justify-center items-center w-full lg:w-1/2 p-8 sm:p-16 bg-white relative">
                 {/* Subtle background decoration for right side */}
                 <div className="absolute top-0 right-0 w-full h-full opacity-[0.03] pointer-events-none z-0">

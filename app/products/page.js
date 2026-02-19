@@ -49,7 +49,6 @@ export default function ProductsPage() {
     setIsFormOpen(true);
   };
 
-  // Calculate real analytics data
   const sortedByStock = [...products]
     .sort((a, b) => Number(b.total_stock || 0) - Number(a.total_stock || 0))
     .slice(0, 10);
