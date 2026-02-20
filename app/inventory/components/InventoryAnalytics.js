@@ -100,9 +100,9 @@ export default function InventoryAnalytics({ chartData }) {
             </div>
             
             {/* Transparent bridge */}
-            <div className="absolute top-full left-0 w-full h-2 invisible group-hover/export:visible"></div>
+            <div className="absolute top-full left-0 w-full h-2 opacity-0 group-hover/export:block"></div>
 
-            <div className="absolute right-0 top-[calc(100%+8px)] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all duration-200">
+            <div className="absolute right-0 top-[calc(100%+4px)] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all duration-200">
               <button 
                 onClick={exportToPng}
                 className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
