@@ -27,7 +27,8 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
 
   const filteredInventory = inventoryData.filter((item) => {
     const productId = item.productId || item.product_id || '';
-    const id = item.id || '';
+    const inventoryId = item.inventory_id || item.id || '';
+    const productName = item.product_name || '';
     const location = item.location || '';
     const quantity = item.quantity || 0;
     const threshold = item.threshold || 0;
@@ -35,7 +36,8 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
 
     const matchesSearch = 
       productId.toString().toLowerCase().includes(searchTerm.toLowerCase()) || 
-      id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inventoryId.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       location.toString().toLowerCase().includes(searchTerm.toLowerCase());
     
     const itemDate = new Date(lastUpdated);
@@ -58,6 +60,124 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
     if (sortOrder === 'qty-asc') return aQuantity - bQuantity;
     return 0;
   });
+
+  const handleExport = () => {
+    if (filteredInventory.length === 0) return;
+    
+    const headers = ['Inventory ID', 'Product ID', 'Product Name', 'Location', 'Minimum', 'Maximum', 'Quantity', 'Created By', 'Date Added', 'Updated By', 'Last Updated'];
+    const csvRows = [
+      headers.join(','),
+      ...filteredInventory.map(item => [
+        item.inventory_id || item.id,
+        item.product_id || item.productId,
+        `"${String(item.product_name || '').replace(/"/g, '""')}"`,
+        `"${String(item.location || '').replace(/"/g, '""')}"`,
+        item.minimum || 0,
+        item.maximum || 0,
+        item.quantity || 0,
+        `"${String(item.createdBy || item.created_by || '').replace(/"/g, '""')}"`,
+        item.createdAt || item.created_at || '',
+        `"${String(item.updatedBy || item.updated_by || '').replace(/"/g, '""')}"`,
+        item.lastUpdated || item.last_updated || ''
+      ].join(','))
+    ];
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `inventory_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target.result;
+      
+      // Better CSV parser to handle quotes and commas
+      const parseCSV = (str) => {
+        const arr = [];
+        let quote = false;
+        let col = "";
+        let row = [];
+        
+        for (let c = 0; c < str.length; c++) {
+          let char = str[c];
+          let next = str[c+1];
+          if (char === '"' && quote && next === '"') { col += char; c++; continue; }
+          if (char === '"') { quote = !quote; continue; }
+          if (char === ',' && !quote) { row.push(col); col = ""; continue; }
+          if (char === '\r' && !quote) { continue; }
+          if (char === '\n' && !quote) { row.push(col); arr.push(row); col = ""; row = []; continue; }
+          col += char;
+        }
+        if (col || row.length) { row.push(col); arr.push(row); }
+        return arr;
+      };
+
+      const rows = parseCSV(text);
+      if (rows.length < 2) return;
+
+      const inventoryToImport = rows.slice(1).filter(row => row.length >= 7).map(row => {
+        return {
+          product_id: (row[1] || '').trim(),
+          location: (row[3] || '').trim(),
+          minimum: parseInt(row[4]) || 0,
+          maximum: parseInt(row[5]) || 0,
+          quantity: parseInt(row[6]) || 0,
+          created_by: sessionStorage.getItem('employee_id') || null
+        };
+      });
+
+      const validInventory = inventoryToImport.filter(item => item.product_id && item.location);
+
+      if (validInventory.length === 0) {
+        alert("No valid inventory data found in CSV.");
+        return;
+      }
+
+      if (confirm(`Import ${validInventory.length} inventory records?`)) {
+        let successCount = 0;
+        let lastError = "";
+        for (const item of validInventory) {
+          try {
+            const res = await fetch('/api/inventory', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(item)
+            });
+            if (res.ok) {
+              successCount++;
+            } else {
+              const errData = await res.json();
+              lastError = errData.error || "Server error";
+              console.error("Import failed for record:", item.product_id, errData);
+            }
+          } catch (error) {
+            console.error("Error importing inventory record:", item.product_id, error);
+            lastError = error.message;
+          }
+        }
+        
+        let finalMessage = `Successfully imported ${successCount} out of ${validInventory.length} records.`;
+        if (successCount < validInventory.length) {
+          finalMessage += `\n\nLast error: ${lastError}`;
+        }
+        alert(finalMessage);
+        onDelete(); // Refresh the list
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -94,7 +214,7 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
             </span>
             <input
               type="text"
-              placeholder="Search by ID, Product ID or Location..."
+              placeholder="Search by ID, Product Name, Product ID or Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
@@ -155,12 +275,30 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-gray-100 flex items-center justify-between">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Inventory List</h4>
-          <button 
-            onClick={onAdd}
-            className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100"
-          >
-            Adjust Stock
-          </button>
+          <div className="flex gap-3">
+            <button 
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export
+            </button>
+            <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Import
+              <input type="file" accept=".csv" onChange={handleImport} className="hidden" />
+            </label>
+            <button 
+              onClick={onAdd}
+              className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100"
+            >
+              Adjust Stock
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
