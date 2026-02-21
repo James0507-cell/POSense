@@ -3,23 +3,53 @@ import { supabase } from '../../../dbManager.js';
 
 export async function GET() {
     try {
-        console.log("Top Categories API: Selecting from view_top_selling_categories...");
+        console.log("Top Categories API: Calculating from base tables excluding refunded sales...");
 
+        // Fetch top 5 selling categories by quantity, excluding 'Refunded' sales
         const { data, error } = await supabase
-            .from('view_top_selling_categories')
-            .select('*')
-            .limit(5);
+            .from('sales_items')
+            .select(`
+                quantity,
+                refunded_quantity,
+                unit_price,
+                tax_amount,
+                products ( category ),
+                sales!inner ( status )
+            `)
+            .neq('sales.status', 'Refunded')
+            .limit(100); // Get enough to aggregate
 
         if (error) {
-            console.error("Top Categories API: Error querying view:", error);
-            return NextResponse.json({ error: "Failed to fetch top categories" }, { status: 500 });
+            console.error("Top Categories API: Error fetching data:", error);
+            return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
         }
 
-        const mappedData = (data || []).map(cat => ({
-            name: cat.category_name || 'Uncategorized',
-            quantity: Number(cat.total_quantity_sold || 0),
-            revenue: Number(cat.total_sales_amount || 0) + Number(cat.total_tax_amount || 0)
-        }));
+        // Aggregate by category
+        const aggregation = (data || []).reduce((acc, item) => {
+            const catName = item.products?.category || 'Uncategorized';
+            const activeQty = (item.quantity || 0) - (item.refunded_quantity || 0);
+            
+            // Skip if no quantity was actually sold (or all refunded)
+            if (activeQty <= 0) return acc;
+
+            if (!acc[catName]) {
+                acc[catName] = {
+                    name: catName,
+                    quantity: 0,
+                    revenue: 0
+                };
+            }
+            
+            acc[catName].quantity += activeQty;
+            acc[catName].revenue += (activeQty * (item.unit_price || 0)) + (item.tax_amount || 0);
+            
+            return acc;
+        }, {});
+
+        // Convert to array and sort by quantity desc
+        const mappedData = Object.values(aggregation)
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 5);
 
         // Calculate actual percentages relative to total shown
         const displayTotal = mappedData.reduce((sum, item) => sum + item.quantity, 0);

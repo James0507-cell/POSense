@@ -147,7 +147,10 @@ export default function SalesAnalytics({ salesData }) {
       const dayRevenue = salesData
         .filter(sale => {
           const saleDate = new Date(sale.sale_date);
-          return saleDate.toDateString() === d.toDateString();
+          return (
+            saleDate.toDateString() === d.toDateString() &&
+            sale.status?.toLowerCase() !== 'refunded'
+          );
         })
         .reduce((sum, sale) => sum + (sale.total_amount || 0), 0);
       
@@ -173,6 +176,7 @@ export default function SalesAnalytics({ salesData }) {
   const processPaymentData = () => {
     const methods = {};
     salesData.forEach(sale => {
+      if (sale.status?.toLowerCase() === 'refunded') return; // Skip refunded sales
       const method = sale.payment_type || 'Unknown';
       methods[method] = (methods[method] || 0) + (sale.total_amount || 0);
     });

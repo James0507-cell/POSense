@@ -146,8 +146,8 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
           sales_id: saleId,
           employee_id: employeeId,
           payment_type: paymentType,
-          total_amount: total,
-          total_tax: tax,
+          total_amount: saleId ? (sale.total_amount || 0) : total,
+          total_tax: saleId ? (sale.total_tax || 0) : tax,
           status: finalSaleStatus,
           updated_by: employeeId
         }),
@@ -214,7 +214,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
             body: JSON.stringify({
               sales_item_id: item.sales_item_id,
               quantity: item.total_bought, // Keep original total
-              tax_amount: 0,
+              tax_amount: item.tax_amount, // Preserve original tax amount
               refunded_quantity: item.total_bought, // Mark all as refunded
               status: 'refunded'
             })

@@ -15,7 +15,10 @@ export default function ProductsPage() {
   ]);
 
   const [products, setProducts] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [topCategories, setTopCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
@@ -35,8 +38,33 @@ export default function ProductsPage() {
     }
   };
 
+  const fetchAnalytics = async () => {
+    setLoadingAnalytics(true);
+    try {
+      const [prodRes, catRes] = await Promise.all([
+        fetch('/api/analytics/top-products'),
+        fetch('/api/analytics/top-categories')
+      ]);
+
+      if (prodRes.ok) {
+        const topP = await prodRes.json();
+        setTopProducts(topP);
+      }
+
+      if (catRes.ok) {
+        const topC = await catRes.json();
+        setTopCategories(topC);
+      }
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchAnalytics();
   }, []);
 
   const handleEdit = (product) => {
@@ -223,6 +251,9 @@ export default function ProductsPage() {
                     stockBarData={stockBarData} 
                     categoryPieData={categoryPieData} 
                     productsTimeLineData={productsTimeLineData} 
+                    topProducts={topProducts}
+                    topCategories={topCategories}
+                    loadingAnalytics={loadingAnalytics}
                   />
                 )}
                 {activeTab === 'ai' && (

@@ -176,8 +176,7 @@ export async function DELETE(request) {
             for (const item of items) {
                 await supabase.from('sales_items').update({ 
                     status: 'refunded', // Lowercase to match check constraint
-                    refunded_quantity: item.quantity,
-                    quantity: 0
+                    refunded_quantity: item.quantity
                 }).eq('sales_item_id', item.sales_item_id);
             }
         }

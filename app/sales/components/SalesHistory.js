@@ -145,7 +145,11 @@ export default function SalesHistory({ salesData, products = [], paymentTypes = 
 
   const thisMonthSales = salesData.filter(sale => {
     const saleDate = new Date(sale.sale_date);
-    return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+    return (
+      saleDate.getMonth() === currentMonth && 
+      saleDate.getFullYear() === currentYear &&
+      sale.status?.toLowerCase() !== 'refunded'
+    );
   });
 
   const totalRevenue = thisMonthSales.reduce((acc, sale) => acc + (sale.total_amount || 0), 0);
