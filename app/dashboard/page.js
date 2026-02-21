@@ -197,7 +197,10 @@ export default function Dashboard() {
                 <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Recent Transactions</h4>
                 <p className="text-sm text-gray-500 font-medium">Latest checkout activities</p>
               </div>
-              <button className="text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors uppercase tracking-widest">
+              <button 
+                onClick={() => window.location.href = '/sales'}
+                className="text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors uppercase tracking-widest"
+              >
                 View All
               </button>
             </div>

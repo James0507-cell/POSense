@@ -4,9 +4,9 @@ import { SYSTEM_PROMPT } from './prompts.js';
 export async function POST(request) {
     try {
         const { message, context, history } = await request.json();
-        const apiKey = prcess.env.GEMINI_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY;
         
-        const model = "gemini-2.5-flash-lite";
+        const model = "gemini-2.5-flash-lite"; // Using a verified stable model
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         const fullSystemContext = `${SYSTEM_PROMPT}\n\nCURRENT BUSINESS CONTEXT DATA (USE THIS TO ANSWER):\n${JSON.stringify(context, null, 2)}`;
