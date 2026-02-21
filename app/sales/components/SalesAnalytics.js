@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,7 +14,8 @@ import {
   ArcElement,
   Filler
 } from 'chart.js';
-import { Line, Pie } from 'react-chartjs-2';
+import { Line, Pie, Bar } from 'react-chartjs-2';
+import { jsPDF } from 'jspdf';
 
 // Register ChartJS components
 ChartJS.register(
@@ -30,11 +31,104 @@ ChartJS.register(
   Filler
 );
 
+// Internal helper for export buttons to avoid re-mounting and state loss in dev
+const ExportButton = ({ chartRef, fileName, exportPng, exportPdf }) => (
+  <div className="relative opacity-0 group-hover:opacity-100 transition-all duration-300">
+    <div className="group/export relative">
+      <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Export
+      </div>
+      
+      {/* Transparent bridge to prevent menu from closing when moving mouse */}
+      <div className="absolute top-full left-0 w-full h-2 opacity-0 group-hover/export:block"></div>
+
+      <div className="absolute right-0 top-[calc(100%+4px)] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all duration-200">
+        <button 
+          onClick={() => exportPng(chartRef, fileName)}
+          className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+        >
+          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          PNG Image
+        </button>
+        <button 
+          onClick={() => exportPdf(chartRef, fileName)}
+          className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+        >
+          <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          PDF Document
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 export default function SalesAnalytics({ salesData }) {
   const [timeRange, setTimeRange] = useState('7');
   const [topProducts, setTopProducts] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
+
+  const trendChartRef = useRef(null);
+  const pieChartRef = useRef(null);
+  const categoryChartRef = useRef(null);
+
+  const exportChartPng = (ref, fileName) => {
+    const chart = ref.current;
+    if (!chart) return;
+
+    const url = chart.toBase64Image();
+    const link = document.createElement('a');
+    link.download = `${fileName}_${new Date().toISOString().split('T')[0]}.png`;
+    link.href = url;
+    link.click();
+  };
+
+  const exportChartPdf = (ref, fileName) => {
+    const chart = ref.current;
+    if (!chart) return;
+
+    const canvas = chart.canvas;
+    const imgData = chart.toBase64Image();
+    
+    const orientation = canvas.width > canvas.height ? 'l' : 'p';
+    const pdf = new jsPDF(orientation, 'px', [canvas.width, canvas.height]);
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save(`${fileName}_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
+  const downloadCsv = (csvContent, fileName) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportProductsCsv = () => {
+    if (topProducts.length === 0) return;
+    const headers = ['Product Name', 'Quantity Sold', 'Revenue'];
+    const csvRows = [
+      headers.join(','),
+      ...topProducts.map(p => [
+        `"${String(p.name || '').replace(/"/g, '""')}"`,
+        p.quantity || 0,
+        (p.revenue || 0).toFixed(2)
+      ].join(','))
+    ];
+    downloadCsv(csvRows.join('\n'), `top_products_${new Date().toISOString().split('T')[0]}.csv`);
+  };
 
   // 1. Process Sales Trend (Line Chart)
   const processTrendData = () => {
@@ -150,8 +244,60 @@ export default function SalesAnalytics({ salesData }) {
     }
   }, [salesData]);
 
+  const processCategoryChartData = () => {
+    return {
+      labels: topCategories.map(c => c.name),
+      datasets: [{
+        label: 'Revenue Share %',
+        data: topCategories.map(c => c.percentage),
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(99, 102, 241, 0.8)',
+          'rgba(168, 85, 247, 0.8)',
+          'rgba(236, 72, 153, 0.8)',
+          'rgba(20, 184, 166, 0.8)',
+        ],
+        borderRadius: 8,
+        barThickness: 12,
+      }]
+    };
+  };
+
+  const categoryBarOptions = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#111827',
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: (context) => ` Share: ${context.raw}%`
+        }
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        max: 100,
+        grid: { color: '#f3f4f6' },
+        ticks: { 
+          callback: (value) => `${value}%`,
+          font: { weight: '600', size: 10 }
+        },
+      },
+      y: {
+        grid: { display: false },
+        ticks: { font: { weight: '600', size: 11 } },
+      },
+    },
+  };
+
   const trendData = processTrendData();
   const pieData = processPaymentData();
+  const categoryData = processCategoryChartData();
 
   const lineOptions = {
     responsive: true,
@@ -203,33 +349,51 @@ export default function SalesAnalytics({ salesData }) {
     <div className="space-y-8 pb-10">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sales Trend Line Chart */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Sales Trend</h4>
               <p className="text-sm text-gray-500 font-medium">Revenue performance over time</p>
             </div>
-            <select 
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
-            >
-              <option value="7">Last 7 Days</option>
-              <option value="14">Last 14 Days</option>
-              <option value="30">Last 30 Days</option>
-            </select>
+            <div className="flex items-center gap-3">
+              <ExportButton 
+                chartRef={trendChartRef} 
+                fileName="sales_trend" 
+                exportPng={exportChartPng} 
+                exportPdf={exportChartPdf} 
+              />
+              <select 
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                <option value="7">Last 7 Days</option>
+                <option value="14">Last 14 Days</option>
+                <option value="30">Last 30 Days</option>
+              </select>
+            </div>
           </div>
           <div className="h-80 w-full">
-            <Line data={trendData} options={lineOptions} />
+            <Line ref={trendChartRef} data={trendData} options={lineOptions} />
           </div>
         </div>
 
         {/* Revenue by Payment Method Pie Chart */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
-          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight mb-1">Revenue by Payment Method</h4>
-          <p className="text-sm text-gray-500 font-medium mb-8">Distribution across payment types</p>
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight mb-1">Revenue by Payment Method</h4>
+              <p className="text-sm text-gray-500 font-medium">Distribution across payment types</p>
+            </div>
+            <ExportButton 
+              chartRef={pieChartRef} 
+              fileName="payment_methods" 
+              exportPng={exportChartPng} 
+              exportPdf={exportChartPdf} 
+            />
+          </div>
           <div className="h-80 w-full">
-            <Pie data={pieData} options={pieOptions} />
+            <Pie ref={pieChartRef} data={pieData} options={pieOptions} />
           </div>
         </div>
       </div>
@@ -242,6 +406,15 @@ export default function SalesAnalytics({ salesData }) {
               <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Top Selling Products</h4>
               <p className="text-sm text-gray-500 font-medium">Most popular items (Last 50 sales)</p>
             </div>
+            <button 
+              onClick={exportProductsCsv}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export CSV
+            </button>
           </div>
           <div className="overflow-x-auto min-h-[300px]">
             {isLoadingDetails ? (
@@ -279,31 +452,28 @@ export default function SalesAnalytics({ salesData }) {
         </div>
 
         {/* Top Selling Categories */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
-          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight mb-1">Top Selling Categories</h4>
-          <p className="text-sm text-gray-500 font-medium mb-8">Revenue by business sector</p>
-          <div className="space-y-6 min-h-[250px]">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Top Selling Categories</h4>
+              <p className="text-sm text-gray-500 font-medium">Revenue by business sector</p>
+            </div>
+            <ExportButton 
+              chartRef={categoryChartRef} 
+              fileName="top_categories" 
+              exportPng={exportChartPng} 
+              exportPdf={exportChartPdf} 
+            />
+          </div>
+          <div className="h-80 w-full">
             {isLoadingDetails ? (
-              <div className="flex flex-col items-center justify-center h-full pt-10 space-y-4">
+              <div className="flex flex-col items-center justify-center h-full space-y-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
               </div>
             ) : topCategories.length > 0 ? (
-              topCategories.map((category, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm font-bold">
-                    <span className="text-gray-700">{category.name}</span>
-                    <span className="text-gray-900">{category.percentage}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                    <div 
-                      className={`${category.color} h-full rounded-full transition-all duration-1000`} 
-                      style={{ width: `${category.percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))
+              <Bar ref={categoryChartRef} data={categoryData} options={categoryBarOptions} />
             ) : (
-              <div className="flex items-center justify-center h-full pt-10 text-gray-500 font-medium">
+              <div className="flex items-center justify-center h-full text-gray-500 font-medium">
                 No category data available.
               </div>
             )}
