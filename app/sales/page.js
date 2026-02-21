@@ -5,6 +5,7 @@ import SideBar from '../components/sideBar.js';
 import SalesHistory from './components/SalesHistory';
 import SalesAnalytics from './components/SalesAnalytics';
 import AIAnalysis from '../components/AIAnalysis';
+import SaleForm from './components/SaleForm';
 
 export default function SalesPage() {
   const [activeTab, setActiveTab] = useState('history');
@@ -15,9 +16,11 @@ export default function SalesPage() {
 
   const [salesData, setSalesData] = useState([]);
   const [paymentTypes, setPaymentTypes] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('Manager');
   const [isAiThinking, setIsAiThinking] = useState(false);
+  const [isNewSaleFormOpen, setIsNewSaleFormOpen] = useState(false);
 
   // Helper to map payment IDs to Names
   const enrichSalesData = (sales, types) => {
@@ -43,17 +46,20 @@ export default function SalesPage() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // Fetch both in parallel
-      const [salesRes, typesRes] = await Promise.all([
+      // Fetch sales, payment types, and products in parallel
+      const [salesRes, typesRes, productsRes] = await Promise.all([
         fetch('/api/sales'),
-        fetch('/api/payment-types')
+        fetch('/api/payment-types'),
+        fetch('/api/products')
       ]);
 
-      if (salesRes.ok && typesRes.ok) {
+      if (salesRes.ok && typesRes.ok && productsRes.ok) {
         const sales = await salesRes.json();
         const types = await typesRes.json();
+        const productData = await productsRes.json();
         
         setPaymentTypes(types);
+        setProducts(productData);
         setSalesData(enrichSalesData(sales, types));
       }
     } catch (error) {
@@ -180,8 +186,10 @@ export default function SalesPage() {
                 {activeTab === 'history' && (
                   <SalesHistory 
                     salesData={salesData} 
+                    products={products}
                     paymentTypes={paymentTypes}
                     onUpdate={fetchAllData}
+                    onNewSale={() => setIsNewSaleFormOpen(true)}
                   />
                 )}
                 {activeTab === 'analytics' && <SalesAnalytics salesData={salesData} />}
@@ -200,6 +208,16 @@ export default function SalesPage() {
             )}
           </div>
         </div>
+
+        {/* Sale Form Modal */}
+        {isNewSaleFormOpen && (
+          <SaleForm 
+            products={products}
+            paymentTypes={paymentTypes}
+            onClose={() => setIsNewSaleFormOpen(false)}
+            onSuccess={fetchAllData}
+          />
+        )}
       </main>
     </div>
   );

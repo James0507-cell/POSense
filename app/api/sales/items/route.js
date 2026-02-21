@@ -84,6 +84,8 @@ export async function GET(request) {
                 quantity: Number(quantity),
                 unit_price: Number(unit_price),
                 tax_amount: Number(tax_amount),
+                refunded_quantity: Number(item.refunded_quantity || 0),
+                status: item.status || 'Confirmed',
                 product_name: product.name || 'Unknown Product',
                 product_barcode: product.barcode || 'N/A',
                 product_id: pid,
@@ -94,6 +96,95 @@ export async function GET(request) {
         return NextResponse.json(mappedData);
     } catch (error) {
         console.error("Unexpected error in GET /api/sales/items:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function POST(request) {
+    try {
+        const body = await request.json();
+        const { sale_id, product_id, quantity, unit_price, tax_amount, refunded_quantity, status } = body;
+
+        const payload = { 
+            sale_id: parseInt(sale_id), 
+            product_id: parseInt(product_id), 
+            quantity: parseInt(quantity), 
+            unit_price: parseFloat(unit_price), 
+            tax_amount: parseFloat(tax_amount),
+            refunded_quantity: parseInt(refunded_quantity || 0)
+        };
+
+        if (status) payload.status = status.toLowerCase();
+
+        // Schema confirm: table 'sales_items', column 'sale_id'
+        const { error } = await supabase.from('sales_items').insert([payload]);
+        if (error) throw error;
+
+        return NextResponse.json({ message: "Success" });
+    } catch (error) {
+        console.error("Supabase error in POST /api/sales/items:", error);
+        return NextResponse.json({ error: error.message || "Failed to create sale item" }, { status: 500 });
+    }
+}
+
+export async function PUT(request) {
+    try {
+        const body = await request.json();
+        const { sales_item_id, quantity, tax_amount, refunded_quantity, status } = body;
+
+        if (!sales_item_id) return NextResponse.json({ error: "sales_item_id required" }, { status: 400 });
+
+        // Ensure status is lowercase if provided, to match check constraint ('confirmed', 'refunded', etc)
+        const formattedStatus = status ? status.toLowerCase() : undefined;
+
+        const updateData = {
+            quantity: parseInt(quantity),
+            tax_amount: parseFloat(tax_amount),
+            refunded_quantity: parseInt(refunded_quantity || 0)
+        };
+        
+        if (formattedStatus) updateData.status = formattedStatus;
+
+        const { error } = await supabase
+            .from('sales_items')
+            .update(updateData)
+            .eq('sales_item_id', sales_item_id);
+
+        if (error) throw error;
+        return NextResponse.json({ message: "Success" });
+    } catch (error) {
+        console.error("Supabase error in PUT /api/sales/items:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const saleId = searchParams.get('saleId');
+        
+        if (!saleId) {
+            return NextResponse.json({ error: "Sale ID is required" }, { status: 400 });
+        }
+
+        const sid = parseInt(saleId);
+
+        // Fetch current items to get their quantities for the refund
+        const { data: items } = await supabase.from('sales_items').select('sales_item_id, quantity').eq('sale_id', sid);
+
+        if (items) {
+            for (const item of items) {
+                await supabase.from('sales_items').update({ 
+                    status: 'refunded', // Lowercase to match check constraint
+                    refunded_quantity: item.quantity,
+                    quantity: 0
+                }).eq('sales_item_id', item.sales_item_id);
+            }
+        }
+        
+        return NextResponse.json({ message: "Sale items marked as Refunded successfully" });
+    } catch (error) {
+        console.error("Supabase error in DELETE /api/sales/items:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

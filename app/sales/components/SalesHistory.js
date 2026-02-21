@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import SalesForm from './SalesForm';
+import SaleForm from './SaleForm';
 
-export default function SalesHistory({ salesData, paymentTypes = [], onUpdate }) {
+export default function SalesHistory({ salesData, products = [], paymentTypes = [], onUpdate, onNewSale }) {
   const [selectedSale, setSelectedSale] = useState(null);
   const [saleItems, setSaleItems] = useState([]);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
@@ -254,6 +254,15 @@ export default function SalesHistory({ salesData, paymentTypes = [], onUpdate })
             <p className="text-sm text-gray-500 font-medium">History of all transactions</p>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={onNewSale}
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-100"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              New Sale
+            </button>
             <button 
               onClick={handleExport}
               className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
@@ -317,10 +326,10 @@ export default function SalesHistory({ salesData, paymentTypes = [], onUpdate })
                     </td>
                     <td className="px-8 py-5">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${
-                        sale.status === 'Completed' ? 'bg-green-100 text-green-700' : 
-                        sale.status === 'Cancelled' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                        sale.status?.toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700' : 
+                        sale.status?.toLowerCase() === 'refunded' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
                       }`}>
-                        {sale.status || 'Completed'}
+                        {sale.status ? sale.status.charAt(0).toUpperCase() + sale.status.slice(1).toLowerCase() : 'Confirmed'}
                       </span>
                     </td>
                     <td className="px-8 py-5 text-gray-500 text-xs font-medium">{sale.updated_by || 'Admin'}</td>
@@ -364,8 +373,9 @@ export default function SalesHistory({ salesData, paymentTypes = [], onUpdate })
 
       {/* Sale Form Modal */}
       {isFormOpen && (
-        <SalesForm 
+        <SaleForm 
           sale={editingSale} 
+          products={products}
           paymentTypes={paymentTypes}
           onClose={() => setIsFormOpen(false)} 
           onSuccess={onUpdate} 
@@ -411,9 +421,9 @@ export default function SalesHistory({ salesData, paymentTypes = [], onUpdate })
                 <div>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Status</p>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${
-                    selectedSale?.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    selectedSale?.status?.toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                   }`}>
-                    {selectedSale?.status || 'N/A'}
+                    {selectedSale?.status ? selectedSale.status.charAt(0).toUpperCase() + selectedSale.status.slice(1).toLowerCase() : 'N/A'}
                   </span>
                 </div>
                 <div>
@@ -439,6 +449,7 @@ export default function SalesHistory({ salesData, paymentTypes = [], onUpdate })
                           <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Quantity</th>
                           <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Unit Price</th>
                           <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Tax Amount</th>
+                          <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
                           <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Subtotal</th>
                         </tr>
                       </thead>
@@ -454,11 +465,25 @@ export default function SalesHistory({ salesData, paymentTypes = [], onUpdate })
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-5 text-center font-bold text-gray-700 text-sm">{item.quantity || 0}</td>
+                            <td className="px-6 py-5 text-center font-bold text-gray-700 text-sm">
+                              {item.quantity - item.refunded_quantity}
+                              {item.refunded_quantity > 0 && (
+                                <span className="block text-[10px] text-red-500 font-medium mt-0.5">(-{item.refunded_quantity} returned)</span>
+                              )}
+                            </td>
                             <td className="px-6 py-5 text-right font-medium text-gray-700 text-sm">${(item.unit_price || item['unit price'] || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                             <td className="px-6 py-5 text-right font-medium text-gray-500 text-sm">${(item.tax_amount || item['tax amount'] || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                            <td className="px-6 py-5 text-center">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${
+                                item.status?.toLowerCase() === 'refunded' ? 'bg-red-100 text-red-700' : 
+                                item.status?.toLowerCase() === 'partially_refunded' ? 'bg-orange-100 text-orange-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {(item.status || 'confirmed').replace('_', ' ')}
+                              </span>
+                            </td>
                             <td className="px-6 py-5 text-right font-bold text-blue-700 text-sm">
-                              ${(((item.quantity || 0) * (item.unit_price || item['unit price'] || 0)) + (item.tax_amount || item['tax amount'] || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              ${((item.quantity - item.refunded_quantity) * (item.unit_price || item['unit price'] || 0) + (item.tax_amount || item['tax amount'] || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </td>
                           </tr>
                         ))}
