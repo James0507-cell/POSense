@@ -15,6 +15,7 @@ export default function SalesPage() {
   ]);
 
   const [salesData, setSalesData] = useState([]);
+  const [refundsData, setRefundsData] = useState([]);
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,20 +47,23 @@ export default function SalesPage() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // Fetch sales, payment types, and products in parallel
-      const [salesRes, typesRes, productsRes] = await Promise.all([
+      // Fetch sales, refunds, payment types, and products in parallel
+      const [salesRes, refundsRes, typesRes, productsRes] = await Promise.all([
         fetch('/api/sales'),
+        fetch('/api/refunds'),
         fetch('/api/payment-types'),
         fetch('/api/products')
       ]);
 
-      if (salesRes.ok && typesRes.ok && productsRes.ok) {
+      if (salesRes.ok && refundsRes.ok && typesRes.ok && productsRes.ok) {
         const sales = await salesRes.json();
+        const refunds = await refundsRes.json();
         const types = await typesRes.json();
         const productData = await productsRes.json();
         
         setPaymentTypes(types);
         setProducts(productData);
+        setRefundsData(refunds);
         setSalesData(enrichSalesData(sales, types));
       }
     } catch (error) {
@@ -91,14 +95,14 @@ export default function SalesPage() {
 
     // Calculate quick metrics for AI context
     const totalRev = salesData.reduce((acc, s) => acc + (s.total_amount || 0), 0);
-    const confirmedSales = salesData.filter(s => s.status === 'Confirmed');
+    const confirmedSales = salesData.filter(s => s.status?.toLowerCase() === 'confirmed');
     
     const aiContext = {
       summary: {
         total_records: salesData.length,
         total_revenue: totalRev,
         confirmed_sales_count: confirmedSales.length,
-        refunded_sales_count: salesData.filter(s => s.status === 'Refunded').length,
+        voided_sales_count: salesData.filter(s => s.status?.toLowerCase() === 'voided').length,
         average_sale_value: salesData.length > 0 ? totalRev / salesData.length : 0
       },
       available_payment_methods: paymentTypes.map(t => t.payment_name || t.name),
@@ -186,13 +190,20 @@ export default function SalesPage() {
                 {activeTab === 'history' && (
                   <SalesHistory 
                     salesData={salesData} 
+                    refundsData={refundsData}
                     products={products}
                     paymentTypes={paymentTypes}
                     onUpdate={fetchAllData}
                     onNewSale={() => setIsNewSaleFormOpen(true)}
                   />
                 )}
-                {activeTab === 'analytics' && <SalesAnalytics salesData={salesData} />}
+                {activeTab === 'analytics' && (
+                  <SalesAnalytics 
+                    salesData={salesData} 
+                    refundsData={refundsData}
+                    paymentTypes={paymentTypes}
+                  />
+                )}
                 {activeTab === 'ai' && (
                   <AIAnalysis 
                     chatHistory={chatHistory} 

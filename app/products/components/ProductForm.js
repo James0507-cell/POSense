@@ -11,7 +11,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
     category: '',
     cost_price: '',
     selling_price: '',
-    tax_rate: '0.15',
+    vat: '0',
     created_by: '',
   });
 
@@ -45,7 +45,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
         category: product.category || '',
         cost_price: product.cost_price || '',
         selling_price: product.selling_price || '',
-        tax_rate: product.tax_rate || '0.15',
+        vat: product.vat || '0',
         updated_by: currentEmployeeId,
       });
     } else {
@@ -55,7 +55,18 @@ export default function ProductForm({ product, onClose, onSuccess }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Auto-calculate VAT (12%) when selling price changes
+    if (name === 'selling_price') {
+      const calculatedVat = (parseFloat(value) || 0) * 0.12;
+      setFormData(prev => ({ 
+        ...prev, 
+        selling_price: value, 
+        vat: calculatedVat.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -186,7 +197,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
 
             {/* Selling Price */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Selling Price ($)</label>
+              <label className="text-sm font-bold text-gray-700 ml-1">Selling Price (VAT Inclusive) ($)</label>
               <input
                 type="number"
                 step="0.01"
@@ -199,19 +210,12 @@ export default function ProductForm({ product, onClose, onSuccess }) {
               />
             </div>
 
-            {/* Tax Rate */}
+            {/* VAT (Calculated) */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Tax Rate</label>
-              <select
-                name="tax_rate"
-                value={formData.tax_rate}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
-              >
-                <option value="0">0% (Exempt)</option>
-                <option value="0.05">5% (GST)</option>
-                <option value="0.15">15% (Standard)</option>
-              </select>
+              <label className="text-sm font-bold text-gray-700 ml-1">VAT Component (12%)</label>
+              <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">
+                ${formData.vat}
+              </div>
             </div>
           </div>
 

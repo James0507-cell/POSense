@@ -49,7 +49,7 @@ export async function POST(request) {
         }
 
         // 3. Prepare payload for 'sales' table based on sqlschema.txt
-        const formattedStatus = status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : 'Confirmed';
+        const formattedStatus = status ? status.toLowerCase() : 'confirmed';
 
         const saleData = { 
             sale_date: new Date().toISOString(),
@@ -120,8 +120,8 @@ export async function PUT(request) {
         }
 
         // 2. Prepare payload
-        // Ensure status is capitalized to match enum ('Confirmed', 'Refunded')
-        const formattedStatus = status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : undefined;
+        // Ensure status is formatted correctly to match enum ('confirmed', 'voided')
+        const formattedStatus = status ? status.toLowerCase() : undefined;
 
         const updatePayload = { 
             payment_type_id, 

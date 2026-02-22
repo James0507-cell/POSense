@@ -79,7 +79,7 @@ export default function ProductList({ products, onEdit, onDelete, onAdd }) {
   const handleExport = () => {
     if (filteredProducts.length === 0) return;
     
-    const headers = ['Product ID', 'Brand', 'Name', 'Barcode', 'Description', 'Category', 'Cost', 'Selling Price', 'Tax Rate', 'Created By', 'Created At'];
+    const headers = ['Product ID', 'Brand', 'Name', 'Barcode', 'Description', 'Category', 'Cost', 'Selling Price', 'VAT', 'Created By', 'Created At'];
     const csvRows = [
       headers.join(','),
       ...filteredProducts.map(p => [
@@ -91,7 +91,7 @@ export default function ProductList({ products, onEdit, onDelete, onAdd }) {
         `"${String(p.category || '').replace(/"/g, '""')}"`,
         p.cost_price || p.costPrice || 0,
         p.selling_price || p.sellingPrice || 0,
-        p.tax_rate || p.taxRate || 0,
+        p.vat || 0,
         `"${String(p.created_by || p.createdBy || '').replace(/"/g, '""')}"`,
         p.created_at || p.createdAt || ''
       ].join(','))
@@ -153,7 +153,7 @@ export default function ProductList({ products, onEdit, onDelete, onAdd }) {
           category: (row[5] || '').trim(),
           cost_price: parseFloat(row[6]) || 0,
           selling_price: parseFloat(row[7]) || 0,
-          tax_rate: parseFloat(row[8]) || 0,
+          vat: parseFloat(row[8]) || 0,
           created_by: sessionStorage.getItem('employee_id') || null
         };
       });
@@ -317,7 +317,7 @@ export default function ProductList({ products, onEdit, onDelete, onAdd }) {
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Category</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Cost</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Selling Price</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Tax</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">VAT (12%)</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Created By</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Updated By</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Date Added</th>
@@ -340,7 +340,7 @@ export default function ProductList({ products, onEdit, onDelete, onAdd }) {
                   </td>
                   <td className="px-6 py-5 text-right font-medium text-gray-700 text-sm">${Number(p.cost_price || p.costPrice || 0).toFixed(2)}</td>
                   <td className="px-6 py-5 text-right font-bold text-gray-900 text-sm">${Number(p.selling_price || p.sellingPrice || 0).toFixed(2)}</td>
-                  <td className="px-6 py-5 text-gray-500 text-sm">{(Number(p.tax_rate || p.taxRate || 0) * 100).toFixed(0)}%</td>
+                  <td className="px-6 py-5 text-right font-medium text-blue-600 text-sm">${Number(p.vat || 0).toFixed(2)}</td>
                   <td className="px-6 py-5 text-gray-700 text-sm">{p.created_by || p.createdBy}</td>
                   <td className="px-6 py-5 text-gray-700 text-sm">{p.updated_by || p.updatedBy}</td>
                   <td className="px-6 py-5 text-gray-400 text-xs">{(p.created_at || p.createdAt || '').split(' ')[0]}</td>
