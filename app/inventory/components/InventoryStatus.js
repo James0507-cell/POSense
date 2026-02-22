@@ -300,9 +300,9 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
             </button>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
           <table className="w-full text-left border-collapse">
-            <thead>
+            <thead className="sticky top-0 bg-white z-10 shadow-sm">
               <tr className="bg-gray-50/50">
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Inventory ID</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Product ID</th>

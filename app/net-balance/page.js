@@ -373,10 +373,6 @@ export default function NetBalancePage() {
                     <div className="space-y-12">
                     {/* Sales Section */}
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between px-2">
-                        <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Confirmed Sales</h4>
-                      </div>
-                      
                       {/* Sales Filters */}
                       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -413,9 +409,12 @@ export default function NetBalancePage() {
                       </div>
 
                       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
+                        <div className="p-8 border-b border-gray-100">
+                          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Confirmed Sales</h4>
+                        </div>
+                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
                           <table className="w-full text-left">
-                            <thead>
+                            <thead className="sticky top-0 bg-white z-10 shadow-sm">
                               <tr className="bg-gray-50/50">
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Sale ID</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
@@ -443,10 +442,6 @@ export default function NetBalancePage() {
 
                     {/* Expenses Section */}
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between px-2">
-                        <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Expenses Records</h4>
-                      </div>
-
                       {/* Expenses Filters */}
                       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -483,9 +478,12 @@ export default function NetBalancePage() {
                       </div>
 
                       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
+                        <div className="p-8 border-b border-gray-100">
+                          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Expenses Records</h4>
+                        </div>
+                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
                           <table className="w-full text-left">
-                            <thead>
+                            <thead className="sticky top-0 bg-white z-10 shadow-sm">
                               <tr className="bg-gray-50/50">
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Exp ID</th>
                                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Description</th>

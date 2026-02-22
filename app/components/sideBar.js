@@ -1,11 +1,26 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function SideBar() {
     const router = useRouter();
     const pathname = usePathname();
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    // Persist collapse state across navigation/refreshes
+    React.useEffect(() => {
+        const savedState = localStorage.getItem('sidebar-collapsed');
+        if (savedState !== null) {
+            setIsCollapsed(JSON.parse(savedState));
+        }
+    }, []);
+
+    const toggleCollapse = () => {
+        const newState = !isCollapsed;
+        setIsCollapsed(newState);
+        localStorage.setItem('sidebar-collapsed', JSON.stringify(newState));
+    };
 
     const menuItems = [
         { name: 'Dashboard', path: '/dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
@@ -25,20 +40,34 @@ export default function SideBar() {
     };
 
     return (
-        <div className="w-72 h-screen flex flex-col bg-white border-r border-gray-200 shadow-sm font-[family-name:var(--font-inter)]">
+        <div className={`${isCollapsed ? 'w-24' : 'w-72'} h-screen flex flex-col bg-white border-r border-gray-200 shadow-sm font-[family-name:var(--font-inter)] transition-all duration-300 relative`}>
+            {/* Collapse Toggle Button */}
+            <button 
+                onClick={toggleCollapse}
+                className="absolute -right-3 top-10 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-700 hover:border-blue-700 transition-all z-20 shadow-sm"
+            >
+                <svg className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
             {/* Row 1: App Name and Description */}
-            <div className="p-8 border-b border-gray-50">
+            <div className={`p-8 border-b border-gray-50 ${isCollapsed ? 'flex justify-center px-0' : ''}`}>
                 <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center shadow-md">
+                    <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center shadow-md shrink-0">
                         <span className="text-white font-bold text-xl">P</span>
                     </div>
-                    <h1 className="text-2xl font-[family-name:var(--font-outfit)] font-bold text-blue-900 tracking-tight">
-                        POSense
-                    </h1>
+                    {!isCollapsed && (
+                        <h1 className="text-2xl font-[family-name:var(--font-outfit)] font-bold text-blue-900 tracking-tight whitespace-nowrap overflow-hidden">
+                            POSense
+                        </h1>
+                    )}
                 </div>
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-widest leading-tight">
-                    AI-Powered Intelligence for Modern Business
-                </p>
+                {!isCollapsed && (
+                    <p className="text-xs text-gray-400 font-medium uppercase tracking-widest leading-tight">
+                        AI-Powered Intelligence for Modern Business
+                    </p>
+                )}
             </div>
 
             {/* Row 2: Functionality Buttons */}
@@ -48,44 +77,54 @@ export default function SideBar() {
                         <button
                             key={item.name}
                             onClick={() => handleNavigation(item.path)}
+                            title={isCollapsed ? item.name : ''}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl transition-all ${
                                 pathname === item.path 
                                 ? 'bg-blue-50 text-blue-700 shadow-sm' 
                                 : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                            }`}
+                            } ${isCollapsed ? 'justify-center px-0' : ''}`}
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
                             </svg>
-                            {item.name}
+                            {!isCollapsed && (
+                                <span className="whitespace-nowrap overflow-hidden">{item.name}</span>
+                            )}
                         </button>
                     ))}
                 </nav>
             </div>
 
             {/* Row 3: User Card and Logout Button */}
-            <div className="p-6 mt-auto bg-gray-50/50 border-t border-gray-100">
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 transition-transform hover:scale-[1.02] cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold group-hover:bg-blue-200 transition-colors">
-                            JD
-                        </div>
-                        <div className="flex-1 overflow-hidden">
-                            <p className="text-sm font-bold text-gray-900 truncate">John Doe</p>
-                            <p className="text-xs text-gray-500 font-medium truncate">Store Manager</p>
-                            <p className="text-[10px] text-gray-400 truncate mt-0.5">john.doe@posense.com</p>
+            <div className={`p-6 mt-auto bg-gray-50/50 border-t border-gray-100 ${isCollapsed ? 'px-2 flex flex-col items-center' : ''}`}>
+                {!isCollapsed ? (
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 transition-transform hover:scale-[1.02] cursor-pointer group w-full">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold group-hover:bg-blue-200 transition-colors shrink-0">
+                                JD
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-bold text-gray-900 truncate">John Doe</p>
+                                <p className="text-xs text-gray-500 font-medium truncate">Store Manager</p>
+                                <p className="text-[10px] text-gray-400 truncate mt-0.5">john.doe@posense.com</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold mb-4 shrink-0 shadow-sm border border-gray-100 cursor-pointer">
+                        JD
+                    </div>
+                )}
                 
                 <button 
                     onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors active:scale-[0.98] transform"
+                    title={isCollapsed ? 'Logout' : ''}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors active:scale-[0.98] transform ${isCollapsed ? 'px-0' : ''}`}
                 >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    Logout
+                    {!isCollapsed && <span>Logout</span>}
                 </button>
             </div>
         </div>

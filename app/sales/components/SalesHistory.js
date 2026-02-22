@@ -19,13 +19,20 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
   const [editingSale, setEditingSale] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Search and Filter State
+  // Sales Search and Filter State
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [minAmount, setMinAmount] = useState('');
   const [maxAmount, setMaxAmount] = useState('');
   const [sortOrder, setSortOrder] = useState('date-desc');
+
+  // Refund Search and Filter State
+  const [refundSearchTerm, setRefundSearchTerm] = useState('');
+  const [refundDateFrom, setRefundDateFrom] = useState('');
+  const [refundDateTo, setRefundDateTo] = useState('');
+  const [refundType, setRefundType] = useState('all');
+  const [refundSortOrder, setRefundSortOrder] = useState('date-desc');
 
   const handleEdit = (sale) => {
     setEditingSale(sale);
@@ -118,6 +125,35 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
     if (sortOrder === 'date-asc') return aDate - bDate;
     if (sortOrder === 'amount-desc') return bAmount - aAmount;
     if (sortOrder === 'amount-asc') return aAmount - bAmount;
+    return 0;
+  });
+
+  const filteredRefunds = refundsData.filter((refund) => {
+    const id = (refund.refund_id || '').toString();
+    const saleId = (refund.sale_id || '').toString();
+    const type = (refund.refund_type || '').toString();
+    const date = new Date(refund.created_at);
+
+    const matchesSearch = 
+      id.toLowerCase().includes(refundSearchTerm.toLowerCase()) || 
+      saleId.toLowerCase().includes(refundSearchTerm.toLowerCase());
+    
+    const matchesDateFrom = !refundDateFrom || date >= new Date(refundDateFrom);
+    const matchesDateTo = !refundDateTo || date <= new Date(refundDateTo);
+    
+    const matchesType = refundType === 'all' || type.toLowerCase() === refundType.toLowerCase();
+
+    return matchesSearch && matchesDateFrom && matchesDateTo && matchesType;
+  }).sort((a, b) => {
+    const aDate = new Date(a.created_at);
+    const bDate = new Date(b.created_at);
+    const aAmount = a.total_refund_amount || 0;
+    const bAmount = b.total_refund_amount || 0;
+
+    if (refundSortOrder === 'date-desc') return bDate - aDate;
+    if (refundSortOrder === 'date-asc') return aDate - bDate;
+    if (refundSortOrder === 'amount-desc') return bAmount - aAmount;
+    if (refundSortOrder === 'amount-asc') return aAmount - bAmount;
     return 0;
   });
 
@@ -287,6 +323,45 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
         </div>
       </div>
 
+      {/* Refunds Filter Bar */}
+      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="relative lg:col-span-2">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Search Refund ID or Sale ID..."
+              value={refundSearchTerm}
+              onChange={(e) => setRefundSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+            />
+          </div>
+          <div className="flex gap-2 lg:col-span-2">
+            <input type="date" value={refundDateFrom} onChange={(e) => setRefundDateFrom(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
+            <input type="date" value={refundDateTo} onChange={(e) => setRefundDateTo(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
+          </div>
+          <div>
+            <select value={refundType} onChange={(e) => setRefundType(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer text-gray-700">
+              <option value="all">All Types</option>
+              <option value="full">Full Refund</option>
+              <option value="partial">Partial Refund</option>
+            </select>
+          </div>
+          <div>
+            <select value={refundSortOrder} onChange={(e) => setRefundSortOrder(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Amount High-Low</option>
+              <option value="amount-asc">Amount Low-High</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Refunds Table */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-gray-100">
@@ -306,7 +381,7 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {refundsData.map((refund) => (
+              {filteredRefunds.map((refund) => (
                 <tr key={refund.refund_id} className="hover:bg-gray-50/80 transition-colors">
                   <td className="px-8 py-5 font-bold text-gray-900">{refund.refund_id}</td>
                   <td className="px-8 py-5 text-blue-700 font-bold">{refund.sale_id}</td>
