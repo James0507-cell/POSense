@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import SideBar from '../components/sideBar.js';
 import AIAnalysis from '../components/AIAnalysis';
 import {
@@ -16,6 +16,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import { jsPDF } from 'jspdf';
 
 ChartJS.register(
   CategoryScale,
@@ -29,10 +30,70 @@ ChartJS.register(
   Filler
 );
 
+// Internal helper for export buttons
+const ExportButton = ({ chartRef, fileName, exportPng, exportPdf }) => (
+  <div className="relative opacity-0 group-hover:opacity-100 transition-all duration-300">
+    <div className="group/export relative">
+      <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Export
+      </div>
+      
+      <div className="absolute top-full left-0 w-full h-2 opacity-0 group-hover/export:block"></div>
+
+      <div className="absolute right-0 top-[calc(100%+4px)] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all duration-200">
+        <button 
+          onClick={() => exportPng(chartRef, fileName)}
+          className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+        >
+          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          PNG Image
+        </button>
+        <button 
+          onClick={() => exportPdf(chartRef, fileName)}
+          className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+        >
+          <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          PDF Document
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 export default function NetBalancePage() {
   const [activeTab, setActiveTab] = useState('summary');
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('Manager');
+
+  const cashflowChartRef = useRef(null);
+
+  const exportChartPng = (ref, fileName) => {
+    const chart = ref.current;
+    if (!chart) return;
+    const url = chart.toBase64Image();
+    const link = document.createElement('a');
+    link.download = `${fileName}_${new Date().toISOString().split('T')[0]}.png`;
+    link.href = url;
+    link.click();
+  };
+
+  const exportChartPdf = (ref, fileName) => {
+    const chart = ref.current;
+    if (!chart) return;
+    const canvas = chart.canvas;
+    const imgData = chart.toBase64Image();
+    const orientation = canvas.width > canvas.height ? 'l' : 'p';
+    const pdf = new jsPDF(orientation, 'px', [canvas.width, canvas.height]);
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save(`${fileName}_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
 
   // Data
   const [confirmedSales, setConfirmedSales] = useState([]);
@@ -455,23 +516,32 @@ export default function NetBalancePage() {
                 </div>
                 )}
                 {activeTab === 'analytics' && (
-                  <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8">
+                  <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8 group">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xl font-bold text-gray-900">Cashflow Analysis</h4>
-                      <div className="flex gap-2 p-1 bg-gray-50 rounded-xl">
-                        {['day', 'week', 'month'].map(unit => (
-                          <button 
-                            key={unit}
-                            onClick={() => setTimeUnit(unit)}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${timeUnit === unit ? 'bg-white shadow-sm text-blue-700' : 'text-gray-400 hover:text-gray-600'}`}
-                          >
-                            {unit.toUpperCase()}
-                          </button>
-                        ))}
+                      <div className="flex items-center gap-3">
+                        <ExportButton 
+                          chartRef={cashflowChartRef} 
+                          fileName="cashflow_analysis" 
+                          exportPng={exportChartPng} 
+                          exportPdf={exportChartPdf} 
+                        />
+                        <div className="flex gap-2 p-1 bg-gray-50 rounded-xl">
+                          {['day', 'week', 'month'].map(unit => (
+                            <button 
+                              key={unit}
+                              onClick={() => setTimeUnit(unit)}
+                              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${timeUnit === unit ? 'bg-white shadow-sm text-blue-700' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                              {unit.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="h-[400px]">
                       <Line 
+                        ref={cashflowChartRef}
                         data={chartData} 
                         options={{ 
                           responsive: true, 
