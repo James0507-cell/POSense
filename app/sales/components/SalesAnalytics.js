@@ -69,10 +69,11 @@ const ExportButton = ({ chartRef, fileName, exportPng, exportPdf }) => (
   </div>
 );
 
-export default function SalesAnalytics({ salesData }) {
+export default function SalesAnalytics({ salesData, refundsData = [], paymentTypes = [] }) {
   const [timeRange, setTimeRange] = useState('7');
   const [topProducts, setTopProducts] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
+  const [salesTrendData, setSalesTrendData] = useState({ labels: [], data: [] });
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
 
   const trendChartRef = useRef(null);
@@ -130,59 +131,30 @@ export default function SalesAnalytics({ salesData }) {
     downloadCsv(csvRows.join('\n'), `top_products_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
-  // 1. Process Sales Trend (Line Chart)
-  const processTrendData = () => {
-    const days = parseInt(timeRange);
-    const labels = [];
-    const data = [];
-    const now = new Date();
-
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(now.getDate() - i);
-      const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-      labels.push(dateStr);
-
-      // Sum revenue for this day
-      const dayRevenue = salesData
-        .filter(sale => {
-          const saleDate = new Date(sale.sale_date);
-          return (
-            saleDate.toDateString() === d.toDateString() &&
-            sale.status?.toLowerCase() !== 'refunded'
-          );
-        })
-        .reduce((sum, sale) => sum + (sale.total_amount || 0), 0);
-      
-      data.push(dayRevenue);
-    }
-
-    return {
-      labels,
-      datasets: [{
-        label: 'Revenue',
-        data,
-        borderColor: 'rgba(29, 78, 216, 1)',
-        backgroundColor: 'rgba(29, 78, 216, 0.1)',
-        fill: true,
-        tension: 0.4,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      }]
-    };
-  };
-
   // 2. Process Revenue by Payment Method (Pie Chart)
   const processPaymentData = () => {
-    const methods = {};
+    const paymentNetRevenue = {};
+
+    // Sum sales by payment method, excluding voided sales
     salesData.forEach(sale => {
-      if (sale.status?.toLowerCase() === 'refunded') return; // Skip refunded sales
+      if (sale.status?.toLowerCase() === 'voided') return;
       const method = sale.payment_type || 'Unknown';
-      methods[method] = (methods[method] || 0) + (sale.total_amount || 0);
+      paymentNetRevenue[method] = (paymentNetRevenue[method] || 0) + (sale.total_amount || 0);
     });
 
-    const labels = Object.keys(methods);
-    const values = Object.values(methods);
+    // Deduct refunds by matching them to the original sale's payment method
+    refundsData.forEach(refund => {
+      const originalSale = salesData.find(sale => sale.sale_id === refund.sale_id);
+      if (originalSale) {
+        const method = originalSale.payment_type || 'Unknown';
+        paymentNetRevenue[method] = (paymentNetRevenue[method] || 0) - (refund.total_refund_amount || 0);
+        // Ensure no negative net revenue for a payment method
+        if (paymentNetRevenue[method] < 0) paymentNetRevenue[method] = 0;
+      }
+    });
+
+    const labels = Object.keys(paymentNetRevenue);
+    const values = Object.values(paymentNetRevenue);
 
     // Fallback if empty
     if (labels.length === 0) {
@@ -209,14 +181,15 @@ export default function SalesAnalytics({ salesData }) {
     };
   };
 
-  // 3. Fetch Top Products and Categories (using new analytics endpoint)
+  // 3. Fetch Top Products, Categories, and Sales Trend
   useEffect(() => {
-    const fetchDetailedAnalytics = async () => {
+    const fetchAnalytics = async () => {
       setIsLoadingDetails(true);
       try {
-        const [prodRes, catRes] = await Promise.all([
+        const [prodRes, catRes, trendRes] = await Promise.all([
           fetch('/api/analytics/top-products'),
-          fetch('/api/analytics/top-categories')
+          fetch('/api/analytics/top-categories'),
+          fetch(`/api/analytics/sales-trend?days=${timeRange}`)
         ]);
 
         if (prodRes.ok) {
@@ -226,13 +199,17 @@ export default function SalesAnalytics({ salesData }) {
 
         if (catRes.ok) {
           const topC = await catRes.json();
-          // Add colors to categories
           const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-teal-500'];
           const coloredCategories = topC.map((cat, i) => ({
             ...cat,
             color: colors[i % colors.length]
           }));
           setTopCategories(coloredCategories);
+        }
+
+        if (trendRes.ok) {
+          const trend = await trendRes.json();
+          setSalesTrendData(trend);
         }
       } catch (error) {
         console.error("Error fetching analytics:", error);
@@ -241,12 +218,8 @@ export default function SalesAnalytics({ salesData }) {
       }
     };
 
-    if (salesData.length > 0) {
-      fetchDetailedAnalytics();
-    } else {
-      setIsLoadingDetails(false);
-    }
-  }, [salesData]);
+    fetchAnalytics(); // Always fetch when component mounts or dependencies change
+  }, [salesData, timeRange]);
 
   const processCategoryChartData = () => {
     return {
@@ -299,7 +272,19 @@ export default function SalesAnalytics({ salesData }) {
     },
   };
 
-  const trendData = processTrendData();
+  const trendData = {
+    labels: salesTrendData.labels,
+    datasets: [{
+      label: 'Revenue',
+      data: salesTrendData.data,
+      borderColor: 'rgba(29, 78, 216, 1)',
+      backgroundColor: 'rgba(29, 78, 216, 0.1)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    }]
+  };
   const pieData = processPaymentData();
   const categoryData = processCategoryChartData();
 
