@@ -264,7 +264,7 @@ export default function Dashboard() {
                 <tbody className="divide-y divide-gray-50">
                   {confirmedSales.slice(0, 5).map((s, i) => (
                     <tr key={i} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="px-8 py-5 font-bold text-blue-700 text-sm">#{s.sale_id}</td>
+                      <td className="px-8 py-5 font-bold text-blue-700 text-sm">{s.sale_id}</td>
                       <td className="px-8 py-5 text-gray-500 text-xs font-medium">{new Date(s.sale_date).toLocaleString()}</td>
                       <td className="px-8 py-5 text-right font-bold text-gray-900 text-sm">${Number(s.amount_paid).toFixed(2)}</td>
                     </tr>

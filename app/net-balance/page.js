@@ -424,7 +424,7 @@ export default function NetBalancePage() {
                             <tbody className="divide-y divide-gray-50">
                               {filteredSales.slice(0, 10).map(s => (
                                 <tr key={s.sale_id} className="hover:bg-gray-50/80 transition-colors">
-                                  <td className="px-6 py-5 font-bold text-blue-700 text-sm">#{s.sale_id}</td>
+                                  <td className="px-6 py-5 font-bold text-blue-700 text-sm">{s.sale_id}</td>
                                   <td className="px-6 py-5 text-gray-500 text-xs">{new Date(s.sale_date).toLocaleString()}</td>
                                   <td className="px-6 py-5 text-sm font-bold text-green-600 text-right">${Number(s.amount_paid).toFixed(2)}</td>
                                 </tr>
@@ -494,7 +494,7 @@ export default function NetBalancePage() {
                             <tbody className="divide-y divide-gray-50">
                               {filteredExpenses.slice(0, 10).map(e => (
                                 <tr key={e.expense_id} className="hover:bg-gray-50/80 transition-colors">
-                                  <td className="px-6 py-5 font-bold text-red-500 text-sm">#{e.expense_id}</td>
+                                  <td className="px-6 py-5 font-bold text-red-500 text-sm">{e.expense_id}</td>
                                   <td className="px-6 py-5 text-sm text-gray-700">{e.description}</td>
                                   <td className="px-6 py-5 text-gray-500 text-xs">{new Date(e.expense_date).toLocaleString()}</td>
                                   <td className="px-6 py-5 text-sm font-bold text-red-600 text-right">${Number(e.amount).toFixed(2)}</td>
