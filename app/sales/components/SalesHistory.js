@@ -639,51 +639,58 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-8">
-              <div className="border border-gray-100 rounded-2xl overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-50/50">
-                    <tr>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase">Product</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Qty</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Price</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {saleItems.map((item, i) => (
-                      <tr key={i}>
-                        <td className="px-6 py-5">
-                          <p className="font-bold text-gray-900 text-sm">{item.product_name}</p>
-                          <p className="text-[10px] text-gray-400">ID: {item.product_id}</p>
-                        </td>
-                        <td className="px-6 py-5 text-center font-bold text-gray-700 text-sm">{item.quantity}</td>
-                        <td className="px-6 py-5 text-right text-gray-700 text-sm">${(item.unit_price || 0).toFixed(2)}</td>
-                        <td className="px-6 py-5 text-right font-bold text-blue-700 text-sm">${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
+              {isLoadingItems ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-500 font-medium animate-pulse">Fetching sale items...</p>
+                </div>
+              ) : (
+                <div className="border border-gray-100 rounded-2xl overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50/50">
+                      <tr>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase">Product</th>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Qty</th>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Price</th>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Subtotal</th>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-gray-50/50 font-bold">
-                    <tr>
-                      <td colSpan="3" className="px-6 py-2 text-right text-gray-500 text-sm">Net Amount (Excl. VAT):</td>
-                      <td className="px-6 py-2 text-right text-gray-700 text-sm">
-                        ${((selectedSale?.total_amount || 0) - (selectedSale?.total_tax || 0)).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan="3" className="px-6 py-2 text-right text-gray-500 text-sm">VAT (12% Included):</td>
-                      <td className="px-6 py-2 text-right text-gray-700 text-sm">
-                        ${(selectedSale?.total_tax || 0).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan="3" className="px-6 py-4 text-right text-gray-600">Grand Total:</td>
-                      <td className="px-6 py-4 text-right text-blue-700 text-lg">
-                        ${(selectedSale?.total_amount || 0).toFixed(2)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {saleItems.map((item, i) => (
+                        <tr key={i}>
+                          <td className="px-6 py-5">
+                            <p className="font-bold text-gray-900 text-sm">{item.product_name}</p>
+                            <p className="text-[10px] text-gray-400">ID: {item.product_id}</p>
+                          </td>
+                          <td className="px-6 py-5 text-center font-bold text-gray-700 text-sm">{item.quantity}</td>
+                          <td className="px-6 py-5 text-right text-gray-700 text-sm">${(item.unit_price || 0).toFixed(2)}</td>
+                          <td className="px-6 py-5 text-right font-bold text-blue-700 text-sm">${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-gray-50/50 font-bold">
+                      <tr>
+                        <td colSpan="3" className="px-6 py-2 text-right text-gray-500 text-sm">Net Amount (Excl. VAT):</td>
+                        <td className="px-6 py-2 text-right text-gray-700 text-sm">
+                          ${((selectedSale?.total_amount || 0) - (selectedSale?.total_tax || 0)).toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="3" className="px-6 py-2 text-right text-gray-500 text-sm">VAT (12% Included):</td>
+                        <td className="px-6 py-2 text-right text-gray-700 text-sm">
+                          ${(selectedSale?.total_tax || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan="3" className="px-6 py-4 text-right text-gray-600">Grand Total:</td>
+                        <td className="px-6 py-4 text-right text-blue-700 text-lg">
+                          ${(selectedSale?.total_amount || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -714,35 +721,42 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-8">
-              <div className="border border-gray-100 rounded-2xl overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-50/50">
-                    <tr>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase">Product</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Qty Refunded</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Refund Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {refundItems.map((item, i) => (
-                      <tr key={i}>
-                        <td className="px-6 py-5">
-                          <p className="font-bold text-gray-900 text-sm">{item.product_name}</p>
-                          <p className="text-[10px] text-gray-400">ID: {item.product_id}</p>
-                        </td>
-                        <td className="px-6 py-5 text-center font-bold text-red-600 text-sm">{item.quantity_refunded}</td>
-                        <td className="px-6 py-5 text-right font-bold text-red-700 text-sm">-${(item.subtotal || 0).toFixed(2)}</td>
+              {isLoadingRefundItems ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="w-12 h-12 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-500 font-medium animate-pulse">Fetching refund items...</p>
+                </div>
+              ) : (
+                <div className="border border-gray-100 rounded-2xl overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50/50">
+                      <tr>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase">Product</th>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Qty Refunded</th>
+                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Refund Subtotal</th>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-gray-50/50 font-bold">
-                    <tr>
-                      <td colSpan="2" className="px-6 py-4 text-right text-gray-600">Total Refunded:</td>
-                      <td className="px-6 py-4 text-right text-red-700 text-lg">-${(selectedRefund?.total_refund_amount || 0).toFixed(2)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {refundItems.map((item, i) => (
+                        <tr key={i}>
+                          <td className="px-6 py-5">
+                            <p className="font-bold text-gray-900 text-sm">{item.product_name}</p>
+                            <p className="text-[10px] text-gray-400">ID: {item.product_id}</p>
+                          </td>
+                          <td className="px-6 py-5 text-center font-bold text-red-600 text-sm">{item.quantity_refunded}</td>
+                          <td className="px-6 py-5 text-right font-bold text-red-700 text-sm">-${(item.subtotal || 0).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-gray-50/50 font-bold">
+                      <tr>
+                        <td colSpan="2" className="px-6 py-4 text-right text-gray-600">Total Refunded:</td>
+                        <td className="px-6 py-4 text-right text-red-700 text-lg">-${(selectedRefund?.total_refund_amount || 0).toFixed(2)}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>

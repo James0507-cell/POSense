@@ -392,9 +392,9 @@ export default function ExpensesList({ expenses, categories, onEdit, onDelete, o
             
             <div className="p-6 max-h-[60vh] overflow-y-auto">
               {loadingItems ? (
-                <div className="flex flex-col items-center justify-center py-10">
-                  <div className="w-8 h-8 border-4 border-blue-700/20 border-t-blue-700 rounded-full animate-spin"></div>
-                  <p className="mt-2 text-sm text-gray-500 font-medium">Loading items...</p>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="w-12 h-12 border-4 border-blue-700/20 border-t-blue-700 rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-500 font-medium animate-pulse text-sm">Fetching expense items...</p>
                 </div>
               ) : expenseItems.length > 0 ? (
                 <div className="space-y-4">
