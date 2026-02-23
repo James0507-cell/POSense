@@ -210,10 +210,10 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
             .item-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
             .item-table th { text-align: left; border-bottom: 1px solid #000; padding-bottom: 2px; font-size: 8px; }
             .item-table td { padding: 3px 0; vertical-align: top; word-wrap: break-word; font-size: 9px; }
-            .col-item { width: 38%; }
-            .col-qty { width: 10%; text-align: center; }
-            .col-price { width: 26%; text-align: right; }
-            .col-total { width: 26%; text-align: right; }
+            .col-item { width: 40%; }
+            .col-qty { width: 12%; text-align: center; }
+            .col-price { width: 24%; text-align: right; }
+            .col-total { width: 24%; text-align: right; }
             .text-right { text-align: right; }
             .text-center { text-align: center; }
             .totals { border-top: 1px dashed #000; padding-top: 6px; }
@@ -318,9 +318,9 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
             .item-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
             .item-table th { text-align: left; border-bottom: 1px solid #000; padding-bottom: 2px; font-size: 8px; }
             .item-table td { padding: 3px 0; vertical-align: top; word-wrap: break-word; font-size: 9px; }
-            .col-item { width: 45%; }
-            .col-qty { width: 15%; text-align: center; }
-            .col-total { width: 40%; text-align: right; }
+            .col-item { width: 42%; }
+            .col-qty { width: 13%; text-align: center; }
+            .col-total { width: 45%; text-align: right; }
             .text-right { text-align: right; }
             .text-center { text-align: center; }
             .totals { border-top: 1px dashed #000; padding-top: 6px; }
