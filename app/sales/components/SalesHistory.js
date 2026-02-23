@@ -182,6 +182,210 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
     link.click();
   };
 
+  const handlePrintSale = (sale, items) => {
+    const printWindow = window.open('', '_blank');
+    const id = sale.sale_id || sale.sales_id || sale.id || sale['sales id'];
+    const date = new Date(sale.sale_date).toLocaleString();
+    
+    const html = `
+      <html>
+        <head>
+          <title>Receipt - ${id}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              width: 72mm; 
+              margin: 0 auto; 
+              padding: 4mm 2mm; 
+              font-size: 10px; 
+              line-height: 1.1; 
+              color: #000;
+              background: #fff;
+            }
+            .header { text-align: center; margin-bottom: 8px; border-bottom: 1px dashed #000; padding-bottom: 6px; }
+            .company-name { font-size: 13px; font-weight: bold; display: block; text-transform: uppercase; margin-bottom: 1px; }
+            .info-row { display: flex; justify-content: space-between; margin-bottom: 1px; font-size: 9px; }
+            .sale-info { margin-bottom: 8px; border-bottom: 1px dashed #000; padding-bottom: 6px; }
+            .item-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+            .item-table th { text-align: left; border-bottom: 1px solid #000; padding-bottom: 2px; font-size: 8px; }
+            .item-table td { padding: 3px 0; vertical-align: top; word-wrap: break-word; font-size: 9px; }
+            .col-item { width: 38%; }
+            .col-qty { width: 10%; text-align: center; }
+            .col-price { width: 26%; text-align: right; }
+            .col-total { width: 26%; text-align: right; }
+            .text-right { text-align: right; }
+            .text-center { text-align: center; }
+            .totals { border-top: 1px dashed #000; padding-top: 6px; }
+            .total-row { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 9px; }
+            .grand-total { font-weight: bold; font-size: 11px; margin-top: 4px; border-top: 1px solid #000; padding-top: 4px; }
+            .footer { text-align: center; margin-top: 12px; font-style: italic; font-size: 8px; border-top: 1px dashed #000; padding-top: 6px; }
+            @media print {
+              body { width: 72mm; margin: 0; padding: 1mm; }
+              @page { size: auto; margin: 0mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <span class="company-name">POSense</span>
+            <span style="font-size: 9px;">SALES RECEIPT</span>
+          </div>
+          <div class="sale-info">
+            <div class="info-row"><span>ID:</span> <span>${id}</span></div>
+            <div class="info-row"><span>Date:</span> <span>${date}</span></div>
+            <div class="info-row"><span>Cashier:</span> <span>${sale.employee_id || 'N/A'}</span></div>
+            <div class="info-row"><span>Payment:</span> <span>${sale.payment_type || 'N/A'}</span></div>
+          </div>
+          <table class="item-table">
+            <thead>
+              <tr>
+                <th class="col-item">Item</th>
+                <th class="col-qty text-center">Qty</th>
+                <th class="col-price text-right">Price</th>
+                <th class="col-total text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(item => `
+                <tr>
+                  <td class="col-item">${item.product_name}</td>
+                  <td class="col-qty text-center">${item.quantity}</td>
+                  <td class="col-price text-right">${(item.unit_price || 0).toFixed(2)}</td>
+                  <td class="col-total text-right">${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="totals">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span>$${((sale.total_amount || 0) - (sale.total_tax || 0)).toFixed(2)}</span>
+            </div>
+            <div class="total-row">
+              <span>VAT (12%):</span>
+              <span>$${(sale.total_tax || 0).toFixed(2)}</span>
+            </div>
+            <div class="total-row grand-total">
+              <span>GRAND TOTAL:</span>
+              <span>$${(sale.total_amount || 0).toFixed(2)}</span>
+            </div>
+          </div>
+          <div class="footer">
+            <p>Thank you for your business!</p>
+            <p>Software by POSense</p>
+          </div>
+          <script>
+            window.onload = () => {
+              window.print();
+              setTimeout(() => { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
+  const handlePrintRefund = (refund, items) => {
+    const printWindow = window.open('', '_blank');
+    const id = refund.refund_id;
+    const saleId = refund.sale_id;
+    const date = new Date(refund.created_at).toLocaleString();
+    
+    const html = `
+      <html>
+        <head>
+          <title>Refund Receipt - ${id}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              width: 72mm; 
+              margin: 0 auto; 
+              padding: 4mm 2mm; 
+              font-size: 10px; 
+              line-height: 1.1; 
+              color: #000;
+              background: #fff;
+            }
+            .header { text-align: center; margin-bottom: 8px; border-bottom: 1px dashed #000; padding-bottom: 6px; }
+            .company-name { font-size: 13px; font-weight: bold; display: block; text-transform: uppercase; margin-bottom: 1px; }
+            .info-row { display: flex; justify-content: space-between; margin-bottom: 1px; font-size: 9px; }
+            .refund-info { margin-bottom: 8px; border-bottom: 1px dashed #000; padding-bottom: 6px; }
+            .item-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+            .item-table th { text-align: left; border-bottom: 1px solid #000; padding-bottom: 2px; font-size: 8px; }
+            .item-table td { padding: 3px 0; vertical-align: top; word-wrap: break-word; font-size: 9px; }
+            .col-item { width: 45%; }
+            .col-qty { width: 15%; text-align: center; }
+            .col-total { width: 40%; text-align: right; }
+            .text-right { text-align: right; }
+            .text-center { text-align: center; }
+            .totals { border-top: 1px dashed #000; padding-top: 6px; }
+            .total-row { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 9px; }
+            .grand-total { font-weight: bold; font-size: 11px; margin-top: 4px; border-top: 1px solid #000; padding-top: 4px; }
+            .footer { text-align: center; margin-top: 12px; font-style: italic; font-size: 8px; border-top: 1px dashed #000; padding-top: 6px; }
+            @media print {
+              body { width: 72mm; margin: 0; padding: 1mm; }
+              @page { size: auto; margin: 0mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <span class="company-name">POSense</span>
+            <span style="font-size: 9px;">REFUND RECEIPT</span>
+          </div>
+          <div class="refund-info">
+            <div class="info-row"><span>REF ID:</span> <span>${id}</span></div>
+            <div class="info-row"><span>SALE ID:</span> <span>${saleId}</span></div>
+            <div class="info-row"><span>Date:</span> <span>${date}</span></div>
+            <div class="info-row"><span>Processed:</span> <span>${refund.processed_by || 'N/A'}</span></div>
+          </div>
+          <table class="item-table">
+            <thead>
+              <tr>
+                <th class="col-item">Item</th>
+                <th class="col-qty text-center">Qty</th>
+                <th class="col-total text-right">Refund</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(item => `
+                <tr>
+                  <td class="col-item">${item.product_name}</td>
+                  <td class="col-qty text-center">${item.quantity_refunded}</td>
+                  <td class="col-total text-right">-$${(item.subtotal || 0).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="totals">
+            <div class="total-row grand-total">
+              <span>TOTAL REFUNDED:</span>
+              <span>-$${(refund.total_refund_amount || 0).toFixed(2)}</span>
+            </div>
+          </div>
+          <div class="footer">
+            <p>Refund Transaction</p>
+            <p>Software by POSense</p>
+          </div>
+          <script>
+            window.onload = () => {
+              window.print();
+              setTimeout(() => { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
@@ -419,9 +623,20 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
                 <h3 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Sale Details: {selectedSale?.sale_id || selectedSale?.sales_id || selectedSale?.id}</h3>
                 <p className="text-sm text-gray-500">Timestamp: {new Date(selectedSale?.sale_date).toLocaleString()}</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handlePrintSale(selectedSale, saleItems)} 
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                  title="Print Receipt"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                  </svg>
+                </button>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
             </div>
             <div className="flex-1 overflow-y-auto p-8">
               <div className="border border-gray-100 rounded-2xl overflow-hidden">
@@ -483,9 +698,20 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
                 <h3 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Refund Details: {selectedRefund?.refund_id}</h3>
                 <p className="text-sm text-gray-500">Sale ID: {selectedRefund?.sale_id}</p>
               </div>
-              <button onClick={() => setIsRefundModalOpen(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handlePrintRefund(selectedRefund, refundItems)} 
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                  title="Print Refund Receipt"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                  </svg>
+                </button>
+                <button onClick={() => setIsRefundModalOpen(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
             </div>
             <div className="flex-1 overflow-y-auto p-8">
               <div className="border border-gray-100 rounded-2xl overflow-hidden">
