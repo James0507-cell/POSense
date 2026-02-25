@@ -37,22 +37,7 @@ export default function RefundForm({ sale, items, onClose, onSuccess }) {
     const employeeId = parseInt(sessionStorage.getItem('employee_id')) || 1;
 
     try {
-      // 1. Create Refund Record
-      const refundRes = await fetch('/api/refunds', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sale_id: sale.sale_id || sale.sales_id || sale.id,
-          refund_type: calculatedRefundType,
-          total_refund_amount: totalRefundAmount,
-          processed_by: employeeId,
-        }),
-      });
-
-      if (!refundRes.ok) throw new Error("Failed to create refund record");
-      const refundRecord = await refundRes.json();
-
-      // 2. Create Refund Items
+      // 1. Prepare Refund Items Payload
       const refundItemsPayload = items
         .filter(item => refundQuantities[item.sales_item_id] > 0)
         .map(item => ({
@@ -62,16 +47,23 @@ export default function RefundForm({ sale, items, onClose, onSuccess }) {
           subtotal: refundQuantities[item.sales_item_id] * item.unit_price
         }));
 
-      const itemsRes = await fetch('/api/refunds/items', {
+      // 2. Send everything in one request to /api/refunds
+      const refundRes = await fetch('/api/refunds', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          refund_id: refundRecord.refund_id,
-          items: refundItemsPayload
+          sale_id: sale.sale_id || sale.sales_id || sale.id,
+          refund_type: calculatedRefundType,
+          total_refund_amount: totalRefundAmount,
+          processed_by: employeeId,
+          items: refundItemsPayload // Send items here for atomic processing
         }),
       });
 
-      if (!itemsRes.ok) throw new Error("Failed to record refunded items");
+      if (!refundRes.ok) {
+        const errData = await refundRes.json();
+        throw new Error(errData.error || "Failed to process refund");
+      }
 
       alert("Refund processed successfully!");
       onSuccess();

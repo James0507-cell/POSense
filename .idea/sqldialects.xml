@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/app/api/inventory/route.js" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/app/api/login/route.js" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/app/api/products/route.js" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/supabase/migrations/20260225105051_remote_schema.sql" dialect="PostgreSQL" />
   </component>
 </project>

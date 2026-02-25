@@ -48,7 +48,6 @@ export async function POST(request) {
             numericEmployeeId = null;
         }
 
-        // 3. Prepare payload for 'sales' table based on sqlschema.txt
         const formattedStatus = status ? status.toLowerCase() : 'confirmed';
 
         const saleData = { 

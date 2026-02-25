@@ -1,0 +1,181 @@
+revoke delete on table "public"."cashiers" from "anon";
+
+revoke insert on table "public"."cashiers" from "anon";
+
+revoke references on table "public"."cashiers" from "anon";
+
+revoke select on table "public"."cashiers" from "anon";
+
+revoke trigger on table "public"."cashiers" from "anon";
+
+revoke truncate on table "public"."cashiers" from "anon";
+
+revoke update on table "public"."cashiers" from "anon";
+
+revoke delete on table "public"."cashiers" from "authenticated";
+
+revoke insert on table "public"."cashiers" from "authenticated";
+
+revoke references on table "public"."cashiers" from "authenticated";
+
+revoke select on table "public"."cashiers" from "authenticated";
+
+revoke trigger on table "public"."cashiers" from "authenticated";
+
+revoke truncate on table "public"."cashiers" from "authenticated";
+
+revoke update on table "public"."cashiers" from "authenticated";
+
+revoke delete on table "public"."cashiers" from "service_role";
+
+revoke insert on table "public"."cashiers" from "service_role";
+
+revoke references on table "public"."cashiers" from "service_role";
+
+revoke select on table "public"."cashiers" from "service_role";
+
+revoke trigger on table "public"."cashiers" from "service_role";
+
+revoke truncate on table "public"."cashiers" from "service_role";
+
+revoke update on table "public"."cashiers" from "service_role";
+
+revoke delete on table "public"."stockclerks" from "anon";
+
+revoke insert on table "public"."stockclerks" from "anon";
+
+revoke references on table "public"."stockclerks" from "anon";
+
+revoke select on table "public"."stockclerks" from "anon";
+
+revoke trigger on table "public"."stockclerks" from "anon";
+
+revoke truncate on table "public"."stockclerks" from "anon";
+
+revoke update on table "public"."stockclerks" from "anon";
+
+revoke delete on table "public"."stockclerks" from "authenticated";
+
+revoke insert on table "public"."stockclerks" from "authenticated";
+
+revoke references on table "public"."stockclerks" from "authenticated";
+
+revoke select on table "public"."stockclerks" from "authenticated";
+
+revoke trigger on table "public"."stockclerks" from "authenticated";
+
+revoke truncate on table "public"."stockclerks" from "authenticated";
+
+revoke update on table "public"."stockclerks" from "authenticated";
+
+revoke delete on table "public"."stockclerks" from "service_role";
+
+revoke insert on table "public"."stockclerks" from "service_role";
+
+revoke references on table "public"."stockclerks" from "service_role";
+
+revoke select on table "public"."stockclerks" from "service_role";
+
+revoke trigger on table "public"."stockclerks" from "service_role";
+
+revoke truncate on table "public"."stockclerks" from "service_role";
+
+revoke update on table "public"."stockclerks" from "service_role";
+
+revoke delete on table "public"."storemanagers" from "anon";
+
+revoke insert on table "public"."storemanagers" from "anon";
+
+revoke references on table "public"."storemanagers" from "anon";
+
+revoke select on table "public"."storemanagers" from "anon";
+
+revoke trigger on table "public"."storemanagers" from "anon";
+
+revoke truncate on table "public"."storemanagers" from "anon";
+
+revoke update on table "public"."storemanagers" from "anon";
+
+revoke delete on table "public"."storemanagers" from "authenticated";
+
+revoke insert on table "public"."storemanagers" from "authenticated";
+
+revoke references on table "public"."storemanagers" from "authenticated";
+
+revoke select on table "public"."storemanagers" from "authenticated";
+
+revoke trigger on table "public"."storemanagers" from "authenticated";
+
+revoke truncate on table "public"."storemanagers" from "authenticated";
+
+revoke update on table "public"."storemanagers" from "authenticated";
+
+revoke delete on table "public"."storemanagers" from "service_role";
+
+revoke insert on table "public"."storemanagers" from "service_role";
+
+revoke references on table "public"."storemanagers" from "service_role";
+
+revoke select on table "public"."storemanagers" from "service_role";
+
+revoke trigger on table "public"."storemanagers" from "service_role";
+
+revoke truncate on table "public"."storemanagers" from "service_role";
+
+revoke update on table "public"."storemanagers" from "service_role";
+
+alter table "public"."cashiers" drop constraint "cashiers_created_by_fkey";
+
+alter table "public"."cashiers" drop constraint "cashiers_employee_id_fkey";
+
+alter table "public"."cashiers" drop constraint "cashiers_employee_id_key";
+
+alter table "public"."cashiers" drop constraint "cashiers_updated_by_fkey";
+
+alter table "public"."stockclerks" drop constraint "stockclerks_created_by_fkey";
+
+alter table "public"."stockclerks" drop constraint "stockclerks_employee_id_fkey";
+
+alter table "public"."stockclerks" drop constraint "stockclerks_employee_id_key";
+
+alter table "public"."stockclerks" drop constraint "stockclerks_updated_by_fkey";
+
+alter table "public"."storemanagers" drop constraint "storemanagers_created_by_fkey";
+
+alter table "public"."storemanagers" drop constraint "storemanagers_employee_id_fkey";
+
+alter table "public"."storemanagers" drop constraint "storemanagers_employee_id_key";
+
+alter table "public"."storemanagers" drop constraint "storemanagers_updated_by_fkey";
+
+alter table "public"."cashiers" drop constraint "cashiers_pkey";
+
+alter table "public"."stockclerks" drop constraint "stockclerks_pkey";
+
+alter table "public"."storemanagers" drop constraint "storemanagers_pkey";
+
+drop index if exists "public"."cashiers_employee_id_key";
+
+drop index if exists "public"."cashiers_pkey";
+
+drop index if exists "public"."stockclerks_employee_id_key";
+
+drop index if exists "public"."stockclerks_pkey";
+
+drop index if exists "public"."storemanagers_employee_id_key";
+
+drop index if exists "public"."storemanagers_pkey";
+
+drop table "public"."cashiers";
+
+drop table "public"."stockclerks";
+
+drop table "public"."storemanagers";
+
+drop sequence if exists "public"."cashiers_cashier_id_seq";
+
+drop sequence if exists "public"."stockclerks_stockclerk_id_seq";
+
+drop sequence if exists "public"."storemanagers_storemanager_id_seq";
+
+
