@@ -71,6 +71,8 @@ const ExportButton = ({ chartRef, fileName, exportPng, exportPdf }) => (
 
 export default function SalesAnalytics({ salesData, refundsData = [], paymentTypes = [] }) {
   const [timeRange, setTimeRange] = useState('7');
+  const [topProductsLimit, setTopProductsLimit] = useState('5');
+  const [topCategoriesLimit, setTopCategoriesLimit] = useState('5');
   const [topProducts, setTopProducts] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
   const [salesTrendData, setSalesTrendData] = useState({ labels: [], data: [] });
@@ -187,8 +189,8 @@ export default function SalesAnalytics({ salesData, refundsData = [], paymentTyp
       setIsLoadingDetails(true);
       try {
         const [prodRes, catRes, trendRes] = await Promise.all([
-          fetch('/api/analytics/top-products'),
-          fetch('/api/analytics/top-categories'),
+          fetch(`/api/analytics/top-products?limit=${topProductsLimit}`),
+          fetch(`/api/analytics/top-categories?limit=${topCategoriesLimit}`),
           fetch(`/api/analytics/sales-trend?days=${timeRange}`)
         ]);
 
@@ -219,7 +221,7 @@ export default function SalesAnalytics({ salesData, refundsData = [], paymentTyp
     };
 
     fetchAnalytics(); // Always fetch when component mounts or dependencies change
-  }, [salesData, timeRange]);
+  }, [salesData, timeRange, topProductsLimit, topCategoriesLimit]);
 
   const processCategoryChartData = () => {
     return {
@@ -390,20 +392,31 @@ export default function SalesAnalytics({ salesData, refundsData = [], paymentTyp
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Selling Products Table */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-8 border-b border-gray-100 flex items-center justify-between">
+          <div className="p-8 border-b border-gray-100 flex items-center justify-between flex-wrap gap-4">
             <div>
               <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Top Selling Products</h4>
               <p className="text-sm text-gray-500 font-medium">Most popular items (Last 50 sales)</p>
             </div>
-            <button 
-              onClick={exportProductsCsv}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export CSV
-            </button>
+            <div className="flex items-center gap-3">
+              <select 
+                value={topProductsLimit}
+                onChange={(e) => setTopProductsLimit(e.target.value)}
+                className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                <option value="5">Top 5</option>
+                <option value="10">Top 10</option>
+                <option value="all">All</option>
+              </select>
+              <button 
+                onClick={exportProductsCsv}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export CSV
+              </button>
+            </div>
           </div>
           <div className="overflow-x-auto min-h-[300px]">
             {isLoadingDetails ? (
@@ -442,17 +455,28 @@ export default function SalesAnalytics({ salesData, refundsData = [], paymentTyp
 
         {/* Top Selling Categories */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
             <div>
               <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Top Selling Categories</h4>
               <p className="text-sm text-gray-500 font-medium">Revenue by business sector</p>
             </div>
-            <ExportButton 
-              chartRef={categoryChartRef} 
-              fileName="top_categories" 
-              exportPng={exportChartPng} 
-              exportPdf={exportChartPdf} 
-            />
+            <div className="flex items-center gap-3">
+              <select 
+                value={topCategoriesLimit}
+                onChange={(e) => setTopCategoriesLimit(e.target.value)}
+                className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                <option value="5">Top 5</option>
+                <option value="10">Top 10</option>
+                <option value="all">All</option>
+              </select>
+              <ExportButton 
+                chartRef={categoryChartRef} 
+                fileName="top_categories" 
+                exportPng={exportChartPng} 
+                exportPdf={exportChartPdf} 
+              />
+            </div>
           </div>
           <div className="h-80 w-full">
             {isLoadingDetails ? (

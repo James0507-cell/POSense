@@ -17,6 +17,10 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
+  const [topProductsLimit, setTopProductsLimit] = useState('5');
+  const [topCategoriesLimit, setTopCategoriesLimit] = useState('5');
+  const [stockLimit, setStockLimit] = useState('10');
+  const [growthTimeRange, setGrowthTimeRange] = useState('7');
   const [loading, setLoading] = useState(true);
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -42,8 +46,8 @@ export default function ProductsPage() {
     setLoadingAnalytics(true);
     try {
       const [prodRes, catRes] = await Promise.all([
-        fetch('/api/analytics/top-products'),
-        fetch('/api/analytics/top-categories')
+        fetch(`/api/analytics/top-products?limit=${topProductsLimit}`),
+        fetch(`/api/analytics/top-categories?limit=${topCategoriesLimit}`)
       ]);
 
       if (prodRes.ok) {
@@ -64,8 +68,11 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchProducts();
-    fetchAnalytics();
   }, []);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [topProductsLimit, topCategoriesLimit]);
 
   const handleEdit = (product) => {
     setEditingProduct(product);
@@ -79,7 +86,7 @@ export default function ProductsPage() {
 
   const sortedByStock = [...products]
     .sort((a, b) => Number(b.total_stock || 0) - Number(a.total_stock || 0))
-    .slice(0, 10);
+    .slice(0, stockLimit === 'all' ? undefined : parseInt(stockLimit));
   
   const stockBarData = {
     labels: sortedByStock.map(p => p.name),
@@ -114,19 +121,25 @@ export default function ProductsPage() {
     ],
   };
 
-  // Real growth data based on created_at
+  // Real growth data based on created_at (Daily)
   const getGrowthData = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const labels = [];
     const counts = [];
     const now = new Date();
+    const range = parseInt(growthTimeRange);
 
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      labels.push(months[d.getMonth()]);
+    for (let i = range - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
       
-      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
-      const count = products.filter(p => new Date(p.created_at) <= endOfMonth).length;
+      // Label like "Feb 26"
+      const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      labels.push(label);
+      
+      const endOfDay = new Date(d);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      const count = products.filter(p => new Date(p.created_at) <= endOfDay).length;
       counts.push(count);
     }
     return { labels, counts };
@@ -253,6 +266,14 @@ export default function ProductsPage() {
                     productsTimeLineData={productsTimeLineData} 
                     topProducts={topProducts}
                     topCategories={topCategories}
+                    topProductsLimit={topProductsLimit}
+                    setTopProductsLimit={setTopProductsLimit}
+                    topCategoriesLimit={topCategoriesLimit}
+                    setTopCategoriesLimit={setTopCategoriesLimit}
+                    stockLimit={stockLimit}
+                    setStockLimit={setStockLimit}
+                    growthTimeRange={growthTimeRange}
+                    setGrowthTimeRange={setGrowthTimeRange}
                     loadingAnalytics={loadingAnalytics}
                   />
                 )}

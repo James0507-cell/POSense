@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../dbManager.js';
 
-export async function GET() {
+export async function GET(request) {
     try {
-        console.log("Top Products API: Querying view top_selling_products...");
+        const { searchParams } = new URL(request.url);
+        const limitStr = searchParams.get('limit') || '5';
+        const limit = limitStr === 'all' ? 1000 : parseInt(limitStr);
+
+        console.log(`Top Products API: Querying view top_selling_products with limit ${limit}...`);
 
         const { data, error } = await supabase
             .from('top_selling_products')
             .select('*')
-            .limit(5);
+            .limit(limit);
 
         if (error) {
             console.error("Top Products API: Error querying view:", error);

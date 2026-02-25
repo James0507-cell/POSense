@@ -3,7 +3,19 @@
 import React from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 
-export default function DashboardOverview({ stats, barData, barOptions, pieData, pieOptions, confirmedSales, inventory }) {
+export default function DashboardOverview({ 
+  stats, 
+  barData, 
+  barOptions, 
+  pieData, 
+  pieOptions, 
+  confirmedSales, 
+  inventory,
+  timeRange = '7',
+  setTimeRange,
+  topCategoriesLimit = '5',
+  setTopCategoriesLimit
+}) {
   return (
     <div className="p-10 space-y-8 animate-fade-in">
       {/* Metrics */}
@@ -31,11 +43,20 @@ export default function DashboardOverview({ stats, barData, barOptions, pieData,
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
             <div>
               <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Sales Overview</h4>
-              <p className="text-sm text-gray-500 font-medium">Last 7 days revenue</p>
+              <p className="text-sm text-gray-500 font-medium">Last {timeRange} days revenue</p>
             </div>
+            <select 
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <option value="7">Last 7 Days</option>
+              <option value="14">Last 14 Days</option>
+              <option value="30">Last 30 Days</option>
+            </select>
           </div>
           <div className="h-80 w-full">
             <Bar data={barData} options={barOptions} />
@@ -43,7 +64,18 @@ export default function DashboardOverview({ stats, barData, barOptions, pieData,
         </div>
 
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
-          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight mb-1">Product Distribution</h4>
+          <div className="flex items-center justify-between mb-1 flex-wrap gap-4">
+            <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Product Distribution</h4>
+            <select 
+              value={topCategoriesLimit}
+              onChange={(e) => setTopCategoriesLimit(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <option value="5">Top 5</option>
+              <option value="10">Top 10</option>
+              <option value="all">All</option>
+            </select>
+          </div>
           <p className="text-sm text-gray-500 font-medium mb-8">Revenue by category</p>
           <div className="h-64 w-full">
             <Pie data={pieData} options={pieOptions} />

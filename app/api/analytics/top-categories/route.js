@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../dbManager.js';
 
-export async function GET() {
+export async function GET(request) {
     try {
-        console.log("Top Categories API: Querying view top_selling_categories...");
+        const { searchParams } = new URL(request.url);
+        const limitStr = searchParams.get('limit') || '5';
+        const limit = limitStr === 'all' ? 1000 : parseInt(limitStr);
+
+        console.log(`Top Categories API: Querying view top_selling_categories with limit ${limit}...`);
 
         const { data, error } = await supabase
             .from('top_selling_categories')
             .select('*')
-            .limit(5);
+            .limit(limit);
 
         if (error) {
             console.error("Top Categories API: Error querying view:", error);

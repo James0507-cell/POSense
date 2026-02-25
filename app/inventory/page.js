@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import SideBar from '../components/sideBar.js';
 import InventoryStatus from './components/InventoryStatus';
 import InventoryAnalytics from './components/InventoryAnalytics';
@@ -15,6 +15,7 @@ export default function InventoryPage() {
   ]);
 
   const [inventoryData, setInventoryData] = useState([]);
+  const [inventoryLimit, setInventoryLimit] = useState('10');
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('Manager');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -63,29 +64,35 @@ export default function InventoryPage() {
   };
 
   // Chart Data for Stock vs Threshold (Maximum)
-  const chartData = {
-    labels: inventoryData.map(item => item.product_name || item.productId || item.product_id),
-    datasets: [
-      {
-        label: 'Current Quantity',
-        data: inventoryData.map(item => item.quantity || 0),
-        backgroundColor: 'rgba(29, 78, 216, 0.8)',
-        borderRadius: 8,
-      },
-      {
-        label: 'Minimum Level',
-        data: inventoryData.map(item => item.minimum || 0),
-        backgroundColor: 'rgba(239, 68, 68, 0.5)',
-        borderRadius: 8,
-      },
-      {
-        label: 'Maximum (Threshold)',
-        data: inventoryData.map(item => item.maximum || item.threshold || 0),
-        backgroundColor: 'rgba(209, 213, 219, 0.8)',
-        borderRadius: 8,
-      }
-    ],
-  };
+  const chartData = useMemo(() => {
+    const sortedData = [...inventoryData]
+      .sort((a, b) => (b.quantity || 0) - (a.quantity || 0))
+      .slice(0, inventoryLimit === 'all' ? undefined : parseInt(inventoryLimit));
+
+    return {
+      labels: sortedData.map(item => item.product_name || item.productId || item.product_id),
+      datasets: [
+        {
+          label: 'Current Quantity',
+          data: sortedData.map(item => item.quantity || 0),
+          backgroundColor: 'rgba(29, 78, 216, 0.8)',
+          borderRadius: 8,
+        },
+        {
+          label: 'Minimum Level',
+          data: sortedData.map(item => item.minimum || 0),
+          backgroundColor: 'rgba(239, 68, 68, 0.5)',
+          borderRadius: 8,
+        },
+        {
+          label: 'Maximum (Threshold)',
+          data: sortedData.map(item => item.maximum || item.threshold || 0),
+          backgroundColor: 'rgba(209, 213, 219, 0.8)',
+          borderRadius: 8,
+        }
+      ],
+    };
+  }, [inventoryData, inventoryLimit]);
 
   const [isAiThinking, setIsAiThinking] = useState(false);
 
@@ -186,7 +193,13 @@ export default function InventoryPage() {
                     onAdd={handleAddNew}
                   />
                 )}
-                {activeTab === 'analytics' && <InventoryAnalytics chartData={chartData} />}
+                {activeTab === 'analytics' && (
+                  <InventoryAnalytics 
+                    chartData={chartData} 
+                    inventoryLimit={inventoryLimit}
+                    setInventoryLimit={setInventoryLimit}
+                  />
+                )}
                 {activeTab === 'ai' && (
                   <AIAnalysis 
                     chatHistory={chatHistory} 

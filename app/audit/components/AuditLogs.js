@@ -105,12 +105,7 @@ export default function AuditLogs() {
                       <p className="font-bold text-gray-900 text-sm">{new Date(log.changed_at).toLocaleString()}</p>
                     </td>
                     <td className="px-8 py-5">
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-black text-xs">
-                           {log.actor_name.charAt(0)}
-                         </div>
-                         <p className="font-bold text-gray-700 text-sm">{log.actor_name}</p>
-                      </div>
+                      <p className="font-bold text-gray-700 text-sm">{log.actor_name}</p>
                     </td>
                     <td className="px-8 py-5">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${

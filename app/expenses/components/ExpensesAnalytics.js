@@ -67,7 +67,7 @@ const ExportButton = ({ chartRef, fileName, exportPng, exportPdf }) => (
   </div>
 );
 
-export default function ExpensesAnalytics({ expenses }) {
+export default function ExpensesAnalytics({ expenses, timeRange = '7', setTimeRange }) {
   const pieChartRef = useRef(null);
   const lineChartRef = useRef(null);
 
@@ -146,29 +146,33 @@ export default function ExpensesAnalytics({ expenses }) {
     };
   }, [expenses]);
 
-  // Expenses Over Time (Line Chart - Last 6 Months)
+  // Expenses Over Time (Line Chart - Daily)
   const timeData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const now = new Date();
+    const range = parseInt(timeRange);
     const labels = [];
     const totals = [];
 
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthLabel = months[d.getMonth()];
-      labels.push(monthLabel);
+    for (let i = range - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      
+      const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      labels.push(label);
 
-      const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
-      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+      const startOfDay = new Date(d);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(d);
+      endOfDay.setHours(23, 59, 59, 999);
 
-      const monthTotal = expenses
+      const dayTotal = expenses
         .filter(e => {
           const ed = new Date(e.expense_date);
-          return ed >= startOfMonth && ed <= endOfMonth;
+          return ed >= startOfDay && ed <= endOfDay;
         })
         .reduce((sum, e) => sum + Number(e.amount), 0);
       
-      totals.push(monthTotal);
+      totals.push(dayTotal);
     }
 
     return {
@@ -181,10 +185,12 @@ export default function ExpensesAnalytics({ expenses }) {
           backgroundColor: 'rgba(29, 78, 216, 0.1)',
           fill: true,
           tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6,
         },
       ],
     };
-  }, [expenses]);
+  }, [expenses, timeRange]);
 
   const chartOptions = {
     responsive: true,
@@ -225,14 +231,28 @@ export default function ExpensesAnalytics({ expenses }) {
 
       {/* Expenses over Time */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
-        <div className="flex items-center justify-between mb-8">
-          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Expenses Trend (Last 6 Months)</h4>
-          <ExportButton 
-            chartRef={lineChartRef} 
-            fileName="expenses_trend" 
-            exportPng={exportChartPng} 
-            exportPdf={exportChartPdf} 
-          />
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+          <div>
+            <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Expenses Trend</h4>
+            <p className="text-sm text-gray-500 font-medium">Last {timeRange} days analysis</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <option value="7">Last 7 Days</option>
+              <option value="14">Last 14 Days</option>
+              <option value="30">Last 30 Days</option>
+            </select>
+            <ExportButton 
+              chartRef={lineChartRef} 
+              fileName="expenses_trend" 
+              exportPng={exportChartPng} 
+              exportPdf={exportChartPdf} 
+            />
+          </div>
         </div>
         <div className="h-80">
           <Line ref={lineChartRef} data={timeData} options={chartOptions} />

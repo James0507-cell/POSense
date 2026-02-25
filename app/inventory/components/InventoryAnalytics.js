@@ -23,7 +23,7 @@ ChartJS.register(
   Legend
 );
 
-export default function InventoryAnalytics({ chartData }) {
+export default function InventoryAnalytics({ chartData, inventoryLimit = '10', setInventoryLimit }) {
   const chartRef = useRef(null);
 
   const exportToPng = () => {
@@ -83,44 +83,57 @@ export default function InventoryAnalytics({ chartData }) {
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
         <div>
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Stock Levels vs Threshold</h4>
           <p className="text-sm text-gray-500 font-medium">Comparison of current stock and minimum required levels</p>
         </div>
         
-        {/* Export Dropdown Menu */}
-        <div className="relative opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="group/export relative">
-            <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export Chart
-            </div>
-            
-            {/* Transparent bridge */}
-            <div className="absolute top-full left-0 w-full h-2 opacity-0 group-hover/export:block"></div>
+        <div className="flex items-center gap-3">
+          <select 
+            value={inventoryLimit}
+            onChange={(e) => setInventoryLimit(e.target.value)}
+            className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+          >
+            <option value="5">Top 5</option>
+            <option value="10">Top 10</option>
+            <option value="20">Top 20</option>
+            <option value="all">All Items</option>
+          </select>
 
-            <div className="absolute right-0 top-[calc(100%+4px)] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all duration-200">
-              <button 
-                onClick={exportToPng}
-                className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
-              >
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          {/* Export Dropdown Menu */}
+          <div className="relative opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="group/export relative">
+              <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                PNG Image
-              </button>
-              <button 
-                onClick={exportToPdf}
-                className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
-              >
-                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                PDF Document
-              </button>
+                Export Chart
+              </div>
+              
+              {/* Transparent bridge */}
+              <div className="absolute top-full left-0 w-full h-2 opacity-0 group-hover/export:block"></div>
+
+              <div className="absolute right-0 top-[calc(100%+4px)] w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 invisible group-hover/export:visible opacity-0 group-hover/export:opacity-100 transition-all duration-200">
+                <button 
+                  onClick={exportToPng}
+                  className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                >
+                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  PNG Image
+                </button>
+                <button 
+                  onClick={exportToPdf}
+                  className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                >
+                  <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  PDF Document
+                </button>
+              </div>
             </div>
           </div>
         </div>

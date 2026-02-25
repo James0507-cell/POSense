@@ -73,6 +73,14 @@ export default function ProductAnalytics({
   productsTimeLineData,
   topProducts = [],
   topCategories = [],
+  topProductsLimit = '5',
+  setTopProductsLimit,
+  topCategoriesLimit = '5',
+  setTopCategoriesLimit,
+  stockLimit = '10',
+  setStockLimit,
+  growthTimeRange = '7',
+  setGrowthTimeRange,
   loadingAnalytics = false
 }) {
   const barChartRef = useRef(null);
@@ -188,9 +196,21 @@ export default function ProductAnalytics({
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Stock by Product */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 lg:col-span-2 group">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Stock levels by Product</h4>
-          <ExportButton chartRef={barChartRef} fileName="stock_levels" exportPng={exportChartPng} exportPdf={exportChartPdf} />
+          <div className="flex items-center gap-3">
+            <select 
+              value={stockLimit}
+              onChange={(e) => setStockLimit(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <option value="5">Top 5</option>
+              <option value="10">Top 10</option>
+              <option value="20">Top 20</option>
+              <option value="all">All</option>
+            </select>
+            <ExportButton chartRef={barChartRef} fileName="stock_levels" exportPng={exportChartPng} exportPdf={exportChartPdf} />
+          </div>
         </div>
         <div className="h-80">
           <Bar ref={barChartRef} data={stockBarData} options={chartOptions} />
@@ -210,9 +230,20 @@ export default function ProductAnalytics({
 
       {/* Products over Time */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Inventory Growth</h4>
-          <ExportButton chartRef={lineChartRef} fileName="inventory_growth" exportPng={exportChartPng} exportPdf={exportChartPdf} />
+          <div className="flex items-center gap-3">
+            <select 
+              value={growthTimeRange}
+              onChange={(e) => setGrowthTimeRange(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <option value="7">Last 7 Days</option>
+              <option value="14">Last 14 Days</option>
+              <option value="30">Last 30 Days</option>
+            </select>
+            <ExportButton chartRef={lineChartRef} fileName="inventory_growth" exportPng={exportChartPng} exportPdf={exportChartPdf} />
+          </div>
         </div>
         <div className="h-80">
           <Line ref={lineChartRef} data={productsTimeLineData} options={chartOptions} />
@@ -221,20 +252,32 @@ export default function ProductAnalytics({
 
       {/* Top Selling Products Table */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group">
-        <div className="p-8 border-b border-gray-100 flex justify-between items-center">
+        <div className="p-8 border-b border-gray-100 flex justify-between items-center flex-wrap gap-4">
           <div>
             <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Top Selling Products</h4>
             <p className="text-sm text-gray-500 font-medium">Most popular items by revenue</p>
           </div>
-          <button 
-            onClick={exportProductsCsv}
-            className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Export CSV
-          </button>
+          <div className="flex items-center gap-3">
+            <select 
+              value={topProductsLimit}
+              onChange={(e) => setTopProductsLimit(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <option value="5">Top 5</option>
+              <option value="10">Top 10</option>
+              <option value="20">Top 20</option>
+              <option value="all">All</option>
+            </select>
+            <button 
+              onClick={exportProductsCsv}
+              className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export CSV
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto min-h-[300px]">
           {loadingAnalytics ? (
@@ -272,17 +315,29 @@ export default function ProductAnalytics({
 
       {/* Top Selling Categories */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 group">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
           <div>
             <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)] tracking-tight">Top Selling Categories</h4>
             <p className="text-sm text-gray-500 font-medium">Revenue share per category</p>
           </div>
-          <ExportButton 
-            chartRef={categoryChartRef} 
-            fileName="top_categories" 
-            exportPng={exportChartPng} 
-            exportPdf={exportChartPdf} 
-          />
+          <div className="flex items-center gap-3">
+            <select 
+              value={topCategoriesLimit}
+              onChange={(e) => setTopCategoriesLimit(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-sm font-bold rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <option value="5">Top 5</option>
+              <option value="10">Top 10</option>
+              <option value="20">Top 20</option>
+              <option value="all">All</option>
+            </select>
+            <ExportButton 
+              chartRef={categoryChartRef} 
+              fileName="top_categories" 
+              exportPng={exportChartPng} 
+              exportPdf={exportChartPdf} 
+            />
+          </div>
         </div>
         <div className="h-80 w-full">
           {loadingAnalytics ? (

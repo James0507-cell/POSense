@@ -20,6 +20,7 @@ export default function ExpensesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [userName, setUserName] = useState('Manager');
+  const [timeRange, setTimeRange] = useState('7');
   const [isAiThinking, setIsAiThinking] = useState(false);
 
   const fetchData = async () => {
@@ -188,6 +189,8 @@ export default function ExpensesPage() {
                 {activeTab === 'analytics' && (
                   <ExpensesAnalytics 
                     expenses={expenses} 
+                    timeRange={timeRange}
+                    setTimeRange={setTimeRange}
                   />
                 )}
                 {activeTab === 'ai' && (

@@ -35,6 +35,8 @@ ChartJS.register(
 export default function Dashboard() {
   const [userName, setUserName] = useState('Manager');
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('7');
+  const [topCategoriesLimit, setTopCategoriesLimit] = useState('5');
   
   // Data State
   const [confirmedSales, setConfirmedSales] = useState([]);
@@ -54,23 +56,19 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [salesRes, expRes, invRes, prodRes, trendRes, catRes] = await Promise.all([
+        const [salesRes, expRes, invRes, prodRes] = await Promise.all([
           fetch('/api/sales/confirmed'),
           fetch('/api/expenses'),
           fetch('/api/inventory'),
-          fetch('/api/products'),
-          fetch('/api/analytics/sales-trend?days=7'),
-          fetch('/api/analytics/top-categories')
+          fetch('/api/products')
         ]);
 
         if (salesRes.ok) setConfirmedSales(await salesRes.json());
         if (expRes.ok) setExpenses(await expRes.json());
         if (invRes.ok) setInventory(await invRes.json());
         if (prodRes.ok) setProducts(await prodRes.json());
-        if (trendRes.ok) setSalesTrend(await trendRes.json());
-        if (catRes.ok) setTopCategories(await catRes.json());
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("Error fetching dashboard static data:", error);
       } finally {
         setLoading(false);
       }
@@ -78,6 +76,24 @@ export default function Dashboard() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const [trendRes, catRes] = await Promise.all([
+          fetch(`/api/analytics/sales-trend?days=${timeRange}`),
+          fetch(`/api/analytics/top-categories?limit=${topCategoriesLimit}`)
+        ]);
+
+        if (trendRes.ok) setSalesTrend(await trendRes.json());
+        if (catRes.ok) setTopCategories(await catRes.json());
+      } catch (error) {
+        console.error("Error fetching dashboard analytics:", error);
+      }
+    };
+
+    fetchAnalytics();
+  }, [timeRange, topCategoriesLimit]);
 
   const stats = useMemo(() => {
     const today = new Date();
@@ -201,6 +217,10 @@ export default function Dashboard() {
             pieOptions={pieOptions}
             confirmedSales={confirmedSales}
             inventory={inventory}
+            timeRange={timeRange}
+            setTimeRange={setTimeRange}
+            topCategoriesLimit={topCategoriesLimit}
+            setTopCategoriesLimit={setTopCategoriesLimit}
           />
       </main>
     </div>
