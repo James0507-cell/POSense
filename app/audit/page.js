@@ -11,6 +11,7 @@ export default function AuditPage() {
     if (typeof window !== 'undefined') {
       const first = sessionStorage.getItem('first_name') || '';
       const last = sessionStorage.getItem('last_name') || '';
+
       if (first || last) setUserName(`${first} ${last}`);
     }
   }, []);
