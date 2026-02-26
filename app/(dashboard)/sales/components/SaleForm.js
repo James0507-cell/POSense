@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import RefundForm from './RefundForm';
+import KioskOrderForm from './KioskOrderForm';
 
 export default function SaleForm({ sale = null, products = [], paymentTypes = [], onClose, onSuccess }) {
   const [cart, setCart] = useState([]);
+  const [viewMode, setViewMode] = useState('standard'); // 'standard' or 'kiosk'
   const [paymentType, setPaymentType] = useState(sale?.payment_type || 'Cash');
   const [status, setStatus] = useState(sale?.status || 'confirmed');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -187,7 +189,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
-      <div className="bg-white rounded-3xl w-full max-w-5xl shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-3xl w-full max-w-7xl shadow-2xl flex flex-col max-h-[95vh]">
         <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-3xl">
           <div>
             <h3 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
@@ -197,9 +199,28 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
               {saleId ? 'Modify transaction status' : 'Create a new transaction'}
             </p>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
+          
+          <div className="flex items-center gap-4">
+            {!saleId && (
+              <div className="flex bg-gray-100 p-1 rounded-xl">
+                <button
+                  onClick={() => setViewMode('standard')}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'standard' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Standard
+                </button>
+                <button
+                  onClick={() => setViewMode('kiosk')}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'kiosk' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Kiosk Mode
+                </button>
+              </div>
+            )}
+            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
         </div>
 
         {isLoadingItems ? (
@@ -208,54 +229,58 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
             <p className="text-gray-500 font-medium">Loading sale items...</p>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 flex flex-col md:flex-row gap-8">
-            <div className="flex-1 space-y-6">
+          <div className="flex-1 overflow-hidden p-6 md:p-8 flex flex-col md:flex-row gap-8">
+            <div className="flex-1 overflow-y-auto space-y-6">
               {!saleId ? (
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Product Selection</label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Search name or barcode..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
-                      />
-                      {searchTerm && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-20 max-h-60 overflow-y-auto">
-                          {filteredProducts.map(p => (
-                            <button
-                              key={p.product_id}
-                              onClick={() => addToCart(p)}
-                              className="w-full px-5 py-3 text-left hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 last:border-none"
-                            >
-                              <div>
-                                <p className="font-bold text-gray-900 text-sm">{p.name}</p>
-                                <p className="text-xs text-gray-400">Barcode: {p.barcode || 'N/A'}</p>
-                              </div>
-                              <p className="font-bold text-blue-700 text-sm">${(p.selling_price || p.price || 0).toFixed(2)}</p>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                viewMode === 'standard' ? (
+                  <div className="space-y-4">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Product Selection</label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="Search name or barcode..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                        />
+                        {searchTerm && (
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-20 max-h-60 overflow-y-auto">
+                            {filteredProducts.map(p => (
+                              <button
+                                key={p.product_id}
+                                onClick={() => addToCart(p)}
+                                className="w-full px-5 py-3 text-left hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 last:border-none"
+                              >
+                                <div>
+                                  <p className="font-bold text-gray-900 text-sm">{p.name}</p>
+                                  <p className="text-xs text-gray-400">Barcode: {p.barcode || 'N/A'}</p>
+                                </div>
+                                <p className="font-bold text-blue-700 text-sm">${(p.selling_price || p.price || 0).toFixed(2)}</p>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button 
+                        onClick={() => setShowScanner(!showScanner)}
+                        className={`p-3.5 rounded-2xl border transition-all ${showScanner ? 'bg-red-50 border-red-200 text-red-600' : 'bg-blue-50 border-blue-200 text-blue-700'}`}
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => setShowScanner(!showScanner)}
-                      className={`p-3.5 rounded-2xl border transition-all ${showScanner ? 'bg-red-50 border-red-200 text-red-600' : 'bg-blue-50 border-blue-200 text-blue-700'}`}
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                    </button>
+                    {showScanner && (
+                      <div className="border-2 border-dashed border-gray-200 rounded-3xl p-4 bg-gray-50 overflow-hidden">
+                        <div id="reader" style={{ width: '100%', minHeight: '300px' }} className="rounded-2xl"></div>
+                      </div>
+                    )}
                   </div>
-                  {showScanner && (
-                    <div className="border-2 border-dashed border-gray-200 rounded-3xl p-4 bg-gray-50 overflow-hidden">
-                      <div id="reader" style={{ width: '100%', minHeight: '300px' }} className="rounded-2xl"></div>
-                    </div>
-                  )}
-                </div>
+                ) : (
+                  <KioskOrderForm products={products} onAddToCart={addToCart} />
+                )
               ) : (
                 <div className="p-6 bg-blue-50 rounded-3xl border border-blue-100 flex flex-col items-center text-center space-y-4">
                   <div className="p-3 bg-blue-100 rounded-2xl text-blue-700">
