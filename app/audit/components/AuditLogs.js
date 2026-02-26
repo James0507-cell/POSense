@@ -91,7 +91,7 @@ export default function AuditLogs() {
               <thead className="sticky top-0 bg-white z-10 shadow-sm">
                 <tr className="bg-gray-50/50">
                   <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Timestamp</th>
-                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Employee</th>
+                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Performed By</th>
                   <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Action</th>
                   <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Table</th>
                   <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Record ID</th>

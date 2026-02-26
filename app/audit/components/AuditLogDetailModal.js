@@ -95,7 +95,7 @@ export default function AuditLogDetailModal({ log: initialLog, onClose }) {
             <div className="mt-2 space-y-1">
                 <p className="text-sm text-gray-500 font-medium">Record ID: <span className="text-gray-900 font-bold">{initialLog.record_id}</span></p>
                 <p className="text-sm text-gray-500 font-medium">Timestamp: <span className="text-gray-900 font-bold">{new Date(initialLog.changed_at).toLocaleString()}</span></p>
-                <p className="text-sm text-gray-500 font-medium">Employee: <span className="text-gray-900 font-bold">{initialLog.actor_name}</span></p>
+                <p className="text-sm text-gray-500 font-medium">Performed By: <span className="text-gray-900 font-bold">{initialLog.actor_name}</span></p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-all">

@@ -7,12 +7,32 @@ export default function SideBar() {
     const router = useRouter();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [user, setUser] = useState({
+        name: 'John Doe',
+        initials: 'JD',
+        role: 'Store Manager',
+        email: 'john.doe@posense.com'
+    });
 
     // Persist collapse state across navigation/refreshes
     React.useEffect(() => {
         const savedState = localStorage.getItem('sidebar-collapsed');
         if (savedState !== null) {
             setIsCollapsed(JSON.parse(savedState));
+        }
+
+        if (typeof window !== 'undefined') {
+            const first = sessionStorage.getItem('first_name') || 'John';
+            const last = sessionStorage.getItem('last_name') || 'Doe';
+            const role = sessionStorage.getItem('role') || 'Store Manager';
+            const email = sessionStorage.getItem('email') || 'user@posense.com';
+            
+            setUser({
+                name: `${first} ${last}`,
+                initials: `${first[0] || ''}${last[0] || ''}`.toUpperCase(),
+                role: role,
+                email: email
+            });
         }
     }, []);
 
@@ -102,18 +122,18 @@ export default function SideBar() {
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 transition-transform hover:scale-[1.02] cursor-pointer group w-full">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold group-hover:bg-blue-200 transition-colors shrink-0">
-                                JD
+                                {user.initials}
                             </div>
                             <div className="flex-1 overflow-hidden">
-                                <p className="text-sm font-bold text-gray-900 truncate">John Doe</p>
-                                <p className="text-xs text-gray-500 font-medium truncate">Store Manager</p>
-                                <p className="text-[10px] text-gray-400 truncate mt-0.5">john.doe@posense.com</p>
+                                <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                                <p className="text-xs text-gray-500 font-medium truncate">{user.role}</p>
+                                <p className="text-[10px] text-gray-400 truncate mt-0.5">{user.email}</p>
                             </div>
                         </div>
                     </div>
                 ) : (
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold mb-4 shrink-0 shadow-sm border border-gray-100 cursor-pointer">
-                        JD
+                        {user.initials}
                     </div>
                 )}
                 

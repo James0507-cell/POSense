@@ -25,6 +25,7 @@ export default function ProductsPage() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [userName, setUserName] = useState('Manager');
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -67,6 +68,11 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const first = sessionStorage.getItem('first_name') || '';
+      const last = sessionStorage.getItem('last_name') || '';
+      if (first || last) setUserName(`${first} ${last}`);
+    }
     fetchProducts();
   }, []);
 
@@ -211,7 +217,7 @@ export default function ProductsPage() {
           </h2>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-gray-900 leading-none">John Doe</p>
+              <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
               <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">Manager View</p>
             </div>
           </div>
