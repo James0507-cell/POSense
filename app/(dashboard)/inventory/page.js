@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import SideBar from '../components/sideBar.js';
 import InventoryStatus from './components/InventoryStatus';
 import InventoryAnalytics from './components/InventoryAnalytics';
-import AIAnalysis from '../components/AIAnalysis';
+import AIAnalysis from '../../components/AIAnalysis';
 import InventoryForm from './components/InventoryForm';
 
 export default function InventoryPage() {
@@ -17,7 +16,6 @@ export default function InventoryPage() {
   const [inventoryData, setInventoryData] = useState([]);
   const [inventoryLimit, setInventoryLimit] = useState('10');
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState('Manager');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -37,12 +35,6 @@ export default function InventoryPage() {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const first = sessionStorage.getItem('first_name') || '';
-      const last = sessionStorage.getItem('last_name') || '';
-      if (first || last) setUserName(`${first} ${last}`);
-    }
-
     fetchInventory();
   }, []);
 
@@ -134,24 +126,8 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-[family-name:var(--font-inter)]">
-      <SideBar />
-
-      <main className="flex-1 overflow-y-auto relative">
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-10 shadow-sm">
-          <h2 className="text-2xl font-[family-name:var(--font-outfit)] font-bold text-gray-900">
-            Inventory Management
-          </h2>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
-              <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">View Only</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-10 space-y-8 animate-fade-in">
-          {/* Tabs Navigation */}
+    <div className="p-10 space-y-8 animate-fade-in">
+      {/* Tabs Navigation */}
           <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
             {[
               { id: 'status', label: 'Inventory Status', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
@@ -214,17 +190,15 @@ export default function InventoryPage() {
               </>
             )}
           </div>
-        </div>
-      </main>
 
-      {/* Inventory Form Modal */}
-      {isFormOpen && (
-        <InventoryForm 
-          item={editingItem} 
-          onClose={() => setIsFormOpen(false)} 
-          onSuccess={fetchInventory} 
-        />
-      )}
-    </div>
-  );
-}
+          {/* Inventory Form Modal */}
+          {isFormOpen && (
+            <InventoryForm 
+              item={editingItem} 
+              onClose={() => setIsFormOpen(false)} 
+              onSuccess={fetchInventory} 
+            />
+          )}
+        </div>
+      );
+    }

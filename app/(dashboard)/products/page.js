@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import SideBar from '../components/sideBar.js';
 import ProductList from './components/ProductList';
 import ProductAnalytics from './components/ProductAnalytics';
-import AIAnalysis from '../components/AIAnalysis';
+import AIAnalysis from '../../components/AIAnalysis';
 import ProductForm from './components/ProductForm';
 
 export default function ProductsPage() {
@@ -25,7 +24,6 @@ export default function ProductsPage() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [userName, setUserName] = useState('Manager');
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -68,11 +66,6 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const first = sessionStorage.getItem('first_name') || '';
-      const last = sessionStorage.getItem('last_name') || '';
-      if (first || last) setUserName(`${first} ${last}`);
-    }
     fetchProducts();
   }, []);
 
@@ -207,24 +200,8 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-[family-name:var(--font-inter)]">
-      <SideBar />
-
-      <main className="flex-1 overflow-y-auto relative">
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-10 shadow-sm">
-          <h2 className="text-2xl font-[family-name:var(--font-outfit)] font-bold text-gray-900">
-            Products Management
-          </h2>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
-              <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">Manager View</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-10 space-y-8 animate-fade-in">
-          {/* Tabs Navigation */}
+    <div className="p-10 space-y-8 animate-fade-in">
+      {/* Tabs Navigation */}
           <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
             {[
               { id: 'list', label: 'Products List', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
@@ -297,17 +274,15 @@ export default function ProductsPage() {
               </>
             )}
           </div>
-        </div>
-      </main>
 
-      {/* Product Form Modal (Rendered at root for absolute centering) */}
-      {isFormOpen && (
-        <ProductForm 
-          product={editingProduct} 
-          onClose={() => setIsFormOpen(false)} 
-          onSuccess={fetchProducts} 
-        />
-      )}
-    </div>
-  );
-}
+          {/* Product Form Modal (Rendered at root for absolute centering) */}
+          {isFormOpen && (
+            <ProductForm 
+              product={editingProduct} 
+              onClose={() => setIsFormOpen(false)} 
+              onSuccess={fetchProducts} 
+            />
+          )}
+        </div>
+      );
+    }

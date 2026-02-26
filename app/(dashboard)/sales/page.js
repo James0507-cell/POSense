@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import SideBar from '../components/sideBar.js';
 import SalesHistory from './components/SalesHistory';
 import SalesAnalytics from './components/SalesAnalytics';
-import AIAnalysis from '../components/AIAnalysis';
+import AIAnalysis from '../../components/AIAnalysis';
 import SaleForm from './components/SaleForm';
 
 export default function SalesPage() {
@@ -19,7 +18,6 @@ export default function SalesPage() {
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState('Manager');
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [isNewSaleFormOpen, setIsNewSaleFormOpen] = useState(false);
 
@@ -74,12 +72,6 @@ export default function SalesPage() {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const first = sessionStorage.getItem('first_name') || '';
-      const last = sessionStorage.getItem('last_name') || '';
-      if (first || last) setUserName(`${first} ${last}`);
-    }
-
     fetchAllData();
   }, []);
 
@@ -137,24 +129,8 @@ export default function SalesPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-[family-name:var(--font-inter)]">
-      <SideBar />
-
-      <main className="flex-1 overflow-y-auto relative">
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-10 shadow-sm">
-          <h2 className="text-2xl font-[family-name:var(--font-outfit)] font-bold text-gray-900">
-            Sales Management
-          </h2>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
-              <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">Manager View</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-10 space-y-8 animate-fade-in">
-          {/* Tabs Navigation */}
+    <div className="p-10 space-y-8 animate-fade-in">
+      {/* Tabs Navigation */}
           <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
             {[
               { id: 'history', label: 'Sales History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -218,18 +194,16 @@ export default function SalesPage() {
               </>
             )}
           </div>
-        </div>
 
-        {/* Sale Form Modal */}
-        {isNewSaleFormOpen && (
-          <SaleForm 
-            products={products}
-            paymentTypes={paymentTypes}
-            onClose={() => setIsNewSaleFormOpen(false)}
-            onSuccess={fetchAllData}
-          />
-        )}
-      </main>
-    </div>
-  );
-}
+          {/* Sale Form Modal */}
+          {isNewSaleFormOpen && (
+            <SaleForm 
+              products={products}
+              paymentTypes={paymentTypes}
+              onClose={() => setIsNewSaleFormOpen(false)}
+              onSuccess={fetchAllData}
+            />
+          )}
+        </div>
+      );
+    }

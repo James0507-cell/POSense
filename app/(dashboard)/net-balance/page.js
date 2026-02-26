@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import SideBar from '../components/sideBar.js';
-import AIAnalysis from '../components/AIAnalysis';
+import AIAnalysis from '../../components/AIAnalysis';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -70,7 +69,6 @@ const ExportButton = ({ chartRef, fileName, exportPng, exportPdf }) => (
 export default function NetBalancePage() {
   const [activeTab, setActiveTab] = useState('summary');
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState('Manager');
 
   const cashflowChartRef = useRef(null);
 
@@ -137,11 +135,6 @@ export default function NetBalancePage() {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const first = sessionStorage.getItem('first_name') || '';
-      const last = sessionStorage.getItem('last_name') || '';
-      if (first || last) setUserName(`${first} ${last}`);
-    }
     fetchData();
   }, []);
 
@@ -274,24 +267,8 @@ export default function NetBalancePage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-[family-name:var(--font-inter)]">
-      <SideBar />
-
-      <main className="flex-1 overflow-y-auto relative">
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-10 shadow-sm">
-          <h2 className="text-2xl font-[family-name:var(--font-outfit)] font-bold text-gray-900">
-            Net Balance Summary
-          </h2>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
-              <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">Finance View</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-10 space-y-8 animate-fade-in">
-          {/* Tabs Navigation */}
+    <div className="p-10 space-y-8 animate-fade-in">
+      {/* Tabs Navigation */}
           <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
             {[
               { id: 'summary', label: 'Summary List', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
@@ -570,7 +547,5 @@ export default function NetBalancePage() {
             )}
           </div>
         </div>
-      </main>
-    </div>
   );
 }

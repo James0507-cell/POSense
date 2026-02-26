@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import SideBar from '../components/sideBar.js';
 import ExpensesList from './components/ExpensesList';
 import ExpensesAnalytics from './components/ExpensesAnalytics';
-import AIAnalysis from '../components/AIAnalysis';
+import AIAnalysis from '../../components/AIAnalysis';
 import ExpenseForm from './components/ExpenseForm';
 
 export default function ExpensesPage() {
@@ -19,7 +18,6 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [userName, setUserName] = useState('Manager');
   const [timeRange, setTimeRange] = useState('7');
   const [isAiThinking, setIsAiThinking] = useState(false);
 
@@ -45,11 +43,6 @@ export default function ExpensesPage() {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const first = sessionStorage.getItem('first_name') || '';
-      const last = sessionStorage.getItem('last_name') || '';
-      if (first || last) setUserName(`${first} ${last}`);
-    }
     fetchData();
   }, []);
 
@@ -127,24 +120,8 @@ export default function ExpensesPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden font-[family-name:var(--font-inter)]">
-      <SideBar />
-
-      <main className="flex-1 overflow-y-auto relative">
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-10 shadow-sm">
-          <h2 className="text-2xl font-[family-name:var(--font-outfit)] font-bold text-gray-900">
-            Expenses Management
-          </h2>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-gray-900 leading-none">{userName}</p>
-              <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">Manager View</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-10 space-y-8 animate-fade-in">
-          {/* Tabs Navigation */}
+    <div className="p-10 space-y-8 animate-fade-in">
+      {/* Tabs Navigation */}
           <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
             {[
               { id: 'list', label: 'Expenses List', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
@@ -207,18 +184,16 @@ export default function ExpensesPage() {
               </>
             )}
           </div>
-        </div>
-      </main>
 
-      {/* Expense Form Modal */}
-      {isFormOpen && (
-        <ExpenseForm 
-          expense={editingExpense} 
-          categories={categories}
-          onClose={() => setIsFormOpen(false)} 
-          onSuccess={fetchData} 
-        />
-      )}
-    </div>
-  );
-}
+          {/* Expense Form Modal */}
+          {isFormOpen && (
+            <ExpenseForm 
+              expense={editingExpense} 
+              categories={categories}
+              onClose={() => setIsFormOpen(false)} 
+              onSuccess={fetchData} 
+            />
+          )}
+        </div>
+      );
+    }
