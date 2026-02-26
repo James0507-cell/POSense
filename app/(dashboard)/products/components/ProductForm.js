@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../../dbManager';
 
 export default function ProductForm({ product, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -13,10 +14,12 @@ export default function ProductForm({ product, onClose, onSuccess }) {
     selling_price: '',
     vat: '0',
     created_by: '',
+    image_url: '',
   });
 
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const currentEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('employee_id') : '';
@@ -47,11 +50,41 @@ export default function ProductForm({ product, onClose, onSuccess }) {
         selling_price: product.selling_price || '',
         vat: product.vat || '0',
         updated_by: currentEmployeeId,
+        image_url: product.image_url || '',
       });
     } else {
       setFormData(prev => ({ ...prev, created_by: currentEmployeeId }));
     }
   }, [product]);
+
+  const handleFileUpload = async (e) => {
+    try {
+      setUploading(true);
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, image_url: publicUrl }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -215,6 +248,32 @@ export default function ProductForm({ product, onClose, onSuccess }) {
               <label className="text-sm font-bold text-gray-700 ml-1">VAT Component (12%)</label>
               <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">
                 ${formData.vat}
+              </div>
+            </div>
+
+            {/* Image Upload */}
+            <div className="space-y-2 col-span-1 md:col-span-2">
+              <label className="text-sm font-bold text-gray-700 ml-1">Product Image</label>
+              <div className="flex items-center gap-4">
+                {formData.image_url ? (
+                  <img src={formData.image_url} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-gray-100" />
+                ) : (
+                  <div className="w-20 h-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                  />
+                  {uploading && <p className="text-xs text-blue-600 mt-1 font-bold">Uploading...</p>}
+                </div>
               </div>
             </div>
           </div>

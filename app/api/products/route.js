@@ -34,7 +34,7 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { brand_id, name, barcode, description, category, cost_price, selling_price, vat, created_by } = body;
+        const { brand_id, name, barcode, description, category, cost_price, selling_price, vat, created_by, image_url } = body;
         
         const { data, error } = await supabase
             .from('products')
@@ -49,6 +49,7 @@ export async function POST(request) {
                     selling_price: Number(selling_price), 
                     vat: Number(vat), 
                     created_by,
+                    image_url,
                     created_at: new Date().toISOString()
                 }
             ])
@@ -69,7 +70,7 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const body = await request.json();
-        const { product_id, brand_id, name, barcode, description, category, cost_price, selling_price, vat, updated_by } = body;
+        const { product_id, brand_id, name, barcode, description, category, cost_price, selling_price, vat, updated_by, image_url } = body;
 
         const { data, error } = await supabase
             .from('products')
@@ -83,6 +84,7 @@ export async function PUT(request) {
                 selling_price: Number(selling_price), 
                 vat: Number(vat), 
                 updated_by, 
+                image_url,
                 updated_at: new Date().toISOString() 
             })
             .eq('product_id', product_id)
