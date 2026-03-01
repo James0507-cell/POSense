@@ -354,7 +354,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
               )}
             </div>
 
-            <div className="flex-1 flex flex-col bg-gray-50 rounded-3xl p-6 space-y-6">
+            <div className={`${viewMode === 'kiosk' ? 'w-full md:w-80' : 'flex-1'} flex flex-col bg-gray-50 rounded-3xl p-6 space-y-6`}>
               <h4 className="text-lg font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Cart Items</h4>
               <div className="flex-1 min-h-[300px] space-y-3 overflow-y-auto pr-2">
                 {cart.length === 0 ? (
