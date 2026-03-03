@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SaleForm from './SaleForm';
 
-export default function SalesHistory({ salesData, refundsData = [], products = [], paymentTypes = [], onUpdate, onNewSale }) {
+export default function SalesHistory({ salesData, refundsData = [], products = [], paymentTypes = [], onUpdate, onNewSale, initialView = null, hideMetrics = false }) {
   const [selectedSale, setSelectedSale] = useState(null);
   const [saleItems, setSaleItems] = useState([]);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const refundsRef = useRef(null);
 
   // Refund State
   const [selectedRefund, setSelectedRefund] = useState(null);
@@ -33,6 +34,12 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
   const [refundDateTo, setRefundDateTo] = useState('');
   const [refundType, setRefundType] = useState('all');
   const [refundSortOrder, setRefundSortOrder] = useState('date-desc');
+
+  useEffect(() => {
+    if (initialView === 'refunds' && refundsRef.current) {
+      refundsRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [initialView]);
 
   const handleEdit = (sale) => {
     setEditingSale(sale);
@@ -420,21 +427,23 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
   return (
     <div className="space-y-8">
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
-            <div className="flex items-center justify-between mb-5">
-              <div className={`p-3 rounded-2xl ${stat.bg} group-hover:scale-110 transition-transform`}>
-                <svg className={`w-6 h-6 ${stat.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={stat.icon} />
-                </svg>
+      {!hideMetrics && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {stats.map((stat, i) => (
+            <div key={i} className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+              <div className="flex items-center justify-between mb-5">
+                <div className={`p-3 rounded-2xl ${stat.bg} group-hover:scale-110 transition-transform`}>
+                  <svg className={`w-6 h-6 ${stat.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={stat.icon} />
+                  </svg>
+                </div>
               </div>
+              <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">{stat.label}</p>
+              <p className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">{stat.value}</p>
             </div>
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">{stat.label}</p>
-            <p className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">{stat.value}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Filters Bar */}
       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
@@ -528,7 +537,7 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
       </div>
 
       {/* Refunds Filter Bar */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+      <div ref={refundsRef} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <div className="relative lg:col-span-2">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">

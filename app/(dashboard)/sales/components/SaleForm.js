@@ -5,9 +5,9 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 import RefundForm from './RefundForm';
 import KioskOrderForm from './KioskOrderForm';
 
-export default function SaleForm({ sale = null, products = [], paymentTypes = [], onClose, onSuccess }) {
+export default function SaleForm({ sale = null, products = [], paymentTypes = [], onClose, onSuccess, isInline = false, initialViewMode = 'standard' }) {
   const [cart, setCart] = useState([]);
-  const [viewMode, setViewMode] = useState('standard'); // 'standard' or 'kiosk'
+  const [viewMode, setViewMode] = useState(initialViewMode); // 'standard' or 'kiosk'
   const [paymentType, setPaymentType] = useState(sale?.payment_type || 'Cash');
   const [status, setStatus] = useState(sale?.status || 'confirmed');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -187,41 +187,51 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
     p.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const containerClasses = isInline 
+    ? "w-full flex flex-col" 
+    : "fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto";
+
+  const contentClasses = isInline
+    ? "bg-transparent w-full flex flex-col"
+    : "bg-white rounded-3xl w-full max-w-7xl shadow-2xl flex flex-col max-h-[95vh]";
+
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
-      <div className="bg-white rounded-3xl w-full max-w-7xl shadow-2xl flex flex-col max-h-[95vh]">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-3xl">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
-              {saleId ? `Update Sale #${saleId}` : 'New Sale'}
-            </h3>
-            <p className="text-sm text-gray-500 font-medium">
-              {saleId ? 'Modify transaction status' : 'Create a new transaction'}
-            </p>
+    <div className={containerClasses}>
+      <div className={contentClasses}>
+        {!isInline && (
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-3xl">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
+                {saleId ? `Update Sale #${saleId}` : 'New Sale'}
+              </h3>
+              <p className="text-sm text-gray-500 font-medium">
+                {saleId ? 'Modify transaction status' : 'Create a new transaction'}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {!saleId && (
+                <div className="flex bg-gray-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => setViewMode('standard')}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'standard' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Standard
+                  </button>
+                  <button
+                    onClick={() => setViewMode('kiosk')}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'kiosk' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Kiosk Mode
+                  </button>
+                </div>
+              )}
+              <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-            {!saleId && (
-              <div className="flex bg-gray-100 p-1 rounded-xl">
-                <button
-                  onClick={() => setViewMode('standard')}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'standard' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Standard
-                </button>
-                <button
-                  onClick={() => setViewMode('kiosk')}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'kiosk' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Kiosk Mode
-                </button>
-              </div>
-            )}
-            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-          </div>
-        </div>
+        )}
 
         {isLoadingItems ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 space-y-4">
@@ -229,7 +239,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
             <p className="text-gray-500 font-medium">Loading sale items...</p>
           </div>
         ) : (
-          <div className="flex-1 overflow-hidden p-6 md:p-8 flex flex-col md:flex-row gap-8">
+          <div className={`flex-1 overflow-hidden ${isInline ? 'py-0' : 'p-6 md:p-8'} flex flex-col md:flex-row gap-8`}>
             <div className="flex-1 overflow-y-auto space-y-6">
               {!saleId ? (
                 viewMode === 'standard' ? (
@@ -354,7 +364,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
               )}
             </div>
 
-            <div className={`${viewMode === 'kiosk' ? 'w-full md:w-80' : 'flex-1'} flex flex-col bg-gray-50 rounded-3xl p-6 space-y-6`}>
+            <div className={`${(viewMode === 'kiosk' && !isInline) ? 'w-full md:w-80' : 'flex-1'} flex flex-col bg-gray-50 rounded-3xl p-6 space-y-6`}>
               <h4 className="text-lg font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Cart Items</h4>
               <div className="flex-1 min-h-[300px] space-y-3 overflow-y-auto pr-2">
                 {cart.length === 0 ? (

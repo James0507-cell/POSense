@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-export default function InventoryStatus({ inventoryData, metrics, onEdit, onDelete, onAdd }) {
+export default function InventoryStatus({ inventoryData, metrics, onEdit, onDelete, onAdd, hideMetrics = false, hideActions = false }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -102,7 +102,6 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
     reader.onload = async (event) => {
       const text = event.target.result;
       
-      // Better CSV parser to handle quotes and commas
       const parseCSV = (str) => {
         const arr = [];
         let quote = false;
@@ -182,30 +181,31 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          { label: 'Total Stocks', value: metrics.totalStocks, icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', bgColor: 'bg-blue-50', hoverBg: 'group-hover:bg-blue-100', textColor: 'text-blue-700' },
-          { label: 'Low Stock Alert', value: metrics.lowStock, icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', bgColor: 'bg-orange-50', hoverBg: 'group-hover:bg-orange-100', textColor: 'text-orange-700' },
-          { label: 'Out of Stock', value: metrics.outOfStock, icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636', bgColor: 'bg-red-50', hoverBg: 'group-hover:bg-red-100', textColor: 'text-red-700' },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
-            <div className="flex items-center justify-between mb-5">
-              <div className={`p-3 rounded-2xl ${stat.bgColor} ${stat.hoverBg} transition-colors`}>
-                <svg className={`w-6 h-6 ${stat.textColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={stat.icon} />
-                </svg>
+      {!hideMetrics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            { label: 'Total Stocks', value: metrics.totalStocks, icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', bgColor: 'bg-blue-50', hoverBg: 'group-hover:bg-blue-100', textColor: 'text-blue-700' },
+            { label: 'Low Stock Alert', value: metrics.lowStock, icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', bgColor: 'bg-orange-50', hoverBg: 'group-hover:bg-orange-100', textColor: 'text-orange-700' },
+            { label: 'Out of Stock', value: metrics.outOfStock, icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636', bgColor: 'bg-red-50', hoverBg: 'group-hover:bg-red-100', textColor: 'text-red-700' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+              <div className="flex items-center justify-between mb-5">
+                <div className={`p-3 rounded-2xl ${stat.bgColor} ${stat.hoverBg} transition-colors`}>
+                  <svg className={`w-6 h-6 ${stat.textColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={stat.icon} />
+                  </svg>
+                </div>
               </div>
+              <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">{stat.label}</p>
+              <p className="text-3xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">{stat.value}</p>
             </div>
-            <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">{stat.label}</p>
-            <p className="text-3xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">{stat.value}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Filters Bar */}
       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          {/* Search */}
           <div className="relative lg:col-span-2">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +221,6 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
             />
           </div>
 
-          {/* Date Range */}
           <div className="flex gap-2 lg:col-span-2">
             <input
               type="date"
@@ -237,7 +236,6 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
             />
           </div>
 
-          {/* Quantity Range */}
           <div className="flex gap-2">
             <input
               type="number"
@@ -255,7 +253,6 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
             />
           </div>
 
-          {/* Sort Order */}
           <div>
             <select
               value={sortOrder}
@@ -276,28 +273,34 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
         <div className="p-8 border-b border-gray-100 flex items-center justify-between">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Inventory List</h4>
           <div className="flex gap-3">
-            <button 
-              onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export
-            </button>
-            <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              Import
-              <input type="file" accept=".csv" onChange={handleImport} className="hidden" />
-            </label>
-            <button 
-              onClick={onAdd}
-              className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100"
-            >
-              Adjust Stock
-            </button>
+            {!hideActions && (
+              <>
+                <button 
+                  onClick={handleExport}
+                  className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export
+                </button>
+                <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  Import
+                  <input type="file" accept=".csv" onChange={handleImport} className="hidden" />
+                </label>
+              </>
+            )}
+            {onAdd && (
+              <button 
+                onClick={onAdd}
+                className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-100"
+              >
+                Adjust Stock
+              </button>
+            )}
           </div>
         </div>
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
@@ -314,7 +317,7 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Date Added</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Updated By</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Last Updated</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Actions</th>
+                {(onEdit || (!hideActions && onDelete)) && <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -339,33 +342,39 @@ export default function InventoryStatus({ inventoryData, metrics, onEdit, onDele
                   <td className="px-6 py-5 text-gray-400 text-xs whitespace-nowrap">{(item.createdAt || item.created_at || '').split(' ')[0]}</td>
                   <td className="px-6 py-5 text-gray-700 text-sm">{item.updatedBy || item.updated_by}</td>
                   <td className="px-6 py-5 text-gray-400 text-xs whitespace-nowrap">{item.lastUpdated || item.last_updated}</td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center justify-center gap-2">
-                      <button 
-                        onClick={() => onEdit(item)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Update Stock"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(item.inventory_id || item.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete Entry"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
+                  {(onEdit || (!hideActions && onDelete)) && (
+                    <td className="px-6 py-5">
+                      <div className="flex items-center justify-center gap-2">
+                        {onEdit && (
+                          <button 
+                            onClick={() => onEdit(item)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Update Stock"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        )}
+                        {!hideActions && onDelete && (
+                          <button 
+                            onClick={() => handleDelete(item.inventory_id || item.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Entry"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {filteredInventory.length === 0 && (
                 <tr>
-                  <td colSpan="9" className="px-6 py-10 text-center text-gray-500 font-medium">
+                  <td colSpan={(onEdit || (!hideActions && onDelete)) ? "11" : "10"} className="px-6 py-10 text-center text-gray-500 font-medium">
                     No inventory records found matching your filters.
                   </td>
                 </tr>
