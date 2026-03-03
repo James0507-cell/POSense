@@ -3,7 +3,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SaleForm from './SaleForm';
 
-export default function SalesHistory({ salesData, refundsData = [], products = [], paymentTypes = [], onUpdate, onNewSale, initialView = null, hideMetrics = false }) {
+export default function SalesHistory({ 
+  salesData, 
+  refundsData = [], 
+  products = [], 
+  paymentTypes = [], 
+  onUpdate, 
+  onNewSale, 
+  initialView = null, 
+  hideMetrics = false,
+  hideExport = false
+}) {
   const [selectedSale, setSelectedSale] = useState(null);
   const [saleItems, setSaleItems] = useState([]);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
@@ -487,7 +497,9 @@ export default function SalesHistory({ salesData, refundsData = [], products = [
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Sales History</h4>
           <div className="flex gap-3">
             <button onClick={onNewSale} className="px-6 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 shadow-lg shadow-blue-100 transition-all">New Sale</button>
-            <button onClick={handleExport} className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50">Export CSV</button>
+            {!hideExport && (
+              <button onClick={handleExport} className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50">Export CSV</button>
+            )}
           </div>
         </div>
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">

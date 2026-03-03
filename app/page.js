@@ -35,10 +35,31 @@ const LoginPage = () => {
                 sessionStorage.setItem('first_name', employee.first_name);
                 sessionStorage.setItem('last_name', employee.last_name);
                 sessionStorage.setItem('email', employee.email);
-            }
-            router.push('/dashboard');
-        }
+                sessionStorage.setItem('role', employee.role);
 
+                // Role-based redirection
+                switch (employee.role) {
+                    case 'Admin':
+                    case 'Store Manager':
+                        router.push('/dashboard');
+                        break;
+                    case 'Products and Inventory Manager':
+                        router.push('/products');
+                        break;
+                    case 'Sales & Expense Analyst':
+                        router.push('/sales');
+                        break;
+                    case 'Cashier':
+                        router.push('/sales-records');
+                        break;
+                    case 'Inventory Clerk':
+                        router.push('/inventory-list');
+                        break;
+                    default:
+                        router.push('/dashboard');
+                }
+            }
+        }
     };
 
     return (

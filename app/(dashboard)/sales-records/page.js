@@ -89,6 +89,7 @@ function SalesRecordsContent() {
             onNewSale={() => router.push('/sales?tab=standard')}
             initialView={viewParam}
             hideMetrics={true}
+            hideExport={true}
           />
         )}
       </div>

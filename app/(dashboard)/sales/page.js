@@ -138,12 +138,22 @@ function SalesContent() {
 
   const closeStandardForm = () => {
     setIsNewSaleFormOpen(false);
-    router.push('/sales?tab=history');
+    const role = sessionStorage.getItem('role');
+    if (role === 'Cashier') {
+      router.push('/sales-records');
+    } else {
+      router.push('/sales?tab=history');
+    }
   };
 
   const closeKioskForm = () => {
     setIsKioskMode(false);
-    router.push('/sales?tab=history');
+    const role = sessionStorage.getItem('role');
+    if (role === 'Cashier') {
+      router.push('/sales-records');
+    } else {
+      router.push('/sales?tab=history');
+    }
   };
 
   return (

@@ -11,7 +11,7 @@ export async function POST(request) {
             .select(`
                 credential_id,
                 employee_id,
-                employees:employees!employee_credentials_employee_id_fkey(first_name, last_name, email)
+                employees:employees!employee_credentials_employee_id_fkey(first_name, last_name, email, role)
             `)
             .eq('username', username)
             .eq('password_hash', passwordHash);
@@ -27,7 +27,8 @@ export async function POST(request) {
             employee_id: ec.employee_id,
             first_name: ec.employees?.first_name,
             last_name: ec.employees?.last_name,
-            email: ec.employees?.email
+            email: ec.employees?.email,
+            role: ec.employees?.role
         }));
         
         return NextResponse.json(employees);

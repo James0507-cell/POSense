@@ -71,7 +71,22 @@ function SideBarContent() {
         { name: 'Expenses', path: '/expenses', icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z' },
         { name: 'Net Balance', path: '/net-balance', icon: 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z' },
         { name: 'Audit Logs', path: '/audit', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+        { name: 'Employees', path: '/employees', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
     ];
+
+    const rolePermissions = {
+        'Admin': ['Dashboard', 'Products', 'Inventory', 'Inventory List', 'Sales', 'Sales Records', 'Sales Entry', 'Expenses', 'Net Balance', 'Audit Logs', 'Employees'],
+        'Store Manager': ['Dashboard', 'Products', 'Inventory', 'Sales', 'Sales Entry', 'Expenses', 'Net Balance', 'Audit Logs'],
+        'Products and Inventory Manager': ['Products', 'Inventory'],
+        'Sales & Expense Analyst': ['Sales', 'Sales Entry', 'Expenses', 'Net Balance'],
+        'Cashier': ['Sales Records', 'Sales Entry'],
+        'Inventory Clerk': ['Inventory List']
+    };
+
+    const allowedMenuItems = menuItems.filter(item => {
+        const permissions = rolePermissions[user.role] || [];
+        return permissions.includes(item.name);
+    });
 
     const handleLogout = () => {
         router.push('/');
@@ -135,7 +150,7 @@ function SideBarContent() {
             {/* Row 2: Functionality Buttons */}
             <div className="flex-1 overflow-y-auto py-6 px-4 scrollbar-thin">
                 <nav className="space-y-1">
-                    {menuItems.map((item) => (
+                    {allowedMenuItems.map((item) => (
                         <div key={item.name} className="space-y-1">
                             <button
                                 onClick={() => item.subItems ? toggleMenu(item.name) : handleNavigation(item.path)}
