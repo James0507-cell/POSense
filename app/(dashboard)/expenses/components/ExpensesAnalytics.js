@@ -205,7 +205,7 @@ export default function ExpensesAnalytics({ expenses, timeRange = '7', setTimeRa
         padding: 12,
         cornerRadius: 8,
         callbacks: {
-            label: (context) => ` $${context.raw.toFixed(2)}`
+            label: (context) => ` ₱${context.raw.toFixed(2)}`
         }
       }
     },
@@ -290,7 +290,7 @@ export default function ExpensesAnalytics({ expenses, timeRange = '7', setTimeRa
                         return (
                             <tr key={label} className="hover:bg-gray-50/80 transition-colors">
                                 <td className="px-8 py-5 font-bold text-gray-900 text-sm">{label}</td>
-                                <td className="px-8 py-5 text-right font-bold text-gray-900 text-sm">${value.toFixed(2)}</td>
+                                <td className="px-8 py-5 text-right font-bold text-gray-900 text-sm">₱{value.toFixed(2)}</td>
                                 <td className="px-8 py-5 text-right">
                                     <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-bold uppercase tracking-tight">
                                         {percentage}%

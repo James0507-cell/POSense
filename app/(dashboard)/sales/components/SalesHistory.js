@@ -268,8 +268,8 @@ export default function SalesHistory({
                 <tr>
                   <td class="col-item">${item.product_name}</td>
                   <td class="col-qty text-center">${item.quantity}</td>
-                  <td class="col-price text-right">${(item.unit_price || 0).toFixed(2)}</td>
-                  <td class="col-total text-right">${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
+                  <td class="col-price text-right">₱${(item.unit_price || 0).toFixed(2)}</td>
+                  <td class="col-total text-right">₱${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -277,15 +277,16 @@ export default function SalesHistory({
           <div class="totals">
             <div class="total-row">
               <span>Subtotal:</span>
-              <span>$${((sale.total_amount || 0) - (sale.total_tax || 0)).toFixed(2)}</span>
-            </div>
-            <div class="total-row">
-              <span>VAT (12%):</span>
-              <span>$${(sale.total_tax || 0).toFixed(2)}</span>
-            </div>
-            <div class="total-row grand-total">
-              <span>GRAND TOTAL:</span>
-              <span>$${(sale.total_amount || 0).toFixed(2)}</span>
+              <span>₱${((sale.total_amount || 0) - (sale.total_tax || 0)).toFixed(2)}</span>
+              </div>
+              <div class="summary-row">
+              <span>Tax (12%):</span>
+              <span>₱${(sale.total_tax || 0).toFixed(2)}</span>
+              </div>
+              <div class="summary-row total">
+              <span>Grand Total:</span>
+              <span>₱${(sale.total_amount || 0).toFixed(2)}</span>
+
             </div>
           </div>
           <div class="footer">
@@ -374,7 +375,7 @@ export default function SalesHistory({
                 <tr>
                   <td class="col-item">${item.product_name}</td>
                   <td class="col-qty text-center">${item.quantity_refunded}</td>
-                  <td class="col-total text-right">-$${(item.subtotal || 0).toFixed(2)}</td>
+                  <td class="col-total text-right">-₱${(item.subtotal || 0).toFixed(2)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -382,7 +383,7 @@ export default function SalesHistory({
           <div class="totals">
             <div class="total-row grand-total">
               <span>TOTAL REFUNDED:</span>
-              <span>-$${(refund.total_refund_amount || 0).toFixed(2)}</span>
+              <span>-₱${(refund.total_refund_amount || 0).toFixed(2)}</span>
             </div>
           </div>
           <div class="footer">
@@ -429,9 +430,9 @@ export default function SalesHistory({
   const averageSale = totalSalesCount > 0 ? netRevenue / totalSalesCount : 0;
 
   const stats = [
-    { label: 'Total Revenue This Month', value: `$${netRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-blue-700', bg: 'bg-blue-50' },
+    { label: 'Total Revenue This Month', value: `₱${netRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-blue-700', bg: 'bg-blue-50' },
     { label: 'Total Sales This Month', value: totalSalesCount.toString(), icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z', color: 'text-green-700', bg: 'bg-green-50' },
-    { label: 'Average Sale This Month', value: `$${averageSale.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: 'text-purple-700', bg: 'bg-purple-50' },
+    { label: 'Average Sale This Month', value: `₱${averageSale.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: 'text-purple-700', bg: 'bg-purple-50' },
   ];
 
   return (
@@ -477,8 +478,8 @@ export default function SalesHistory({
             <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
           </div>
           <div className="flex gap-2">
-            <input type="number" placeholder="Min $" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
-            <input type="number" placeholder="Max $" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
+            <input type="number" placeholder="Min ₱" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
+            <input type="number" placeholder="Max ₱" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
           </div>
           <div>
             <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer">
@@ -522,7 +523,7 @@ export default function SalesHistory({
                   <tr key={id} className="hover:bg-gray-50/80 transition-colors">
                     <td className="px-8 py-5 font-bold text-gray-900">{id}</td>
                     <td className="px-8 py-5 text-gray-600 text-sm">{new Date(sale.sale_date).toLocaleString()}</td>
-                    <td className="px-8 py-5 text-right font-bold text-blue-700">${(sale.total_amount || 0).toFixed(2)}</td>
+                    <td className="px-8 py-5 text-right font-bold text-blue-700">₱{(sale.total_amount || 0).toFixed(2)}</td>
                     <td className="px-8 py-5">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${sale.status?.toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {sale.status || 'Confirmed'}
@@ -616,7 +617,7 @@ export default function SalesHistory({
                       {refund.refund_type}
                     </span>
                   </td>
-                  <td className="px-8 py-5 text-right font-bold text-red-600">-${(refund.total_refund_amount || 0).toFixed(2)}</td>
+                  <td className="px-8 py-5 text-right font-bold text-red-600">-₱{(refund.total_refund_amount || 0).toFixed(2)}</td>
                   <td className="px-8 py-5 text-center text-gray-600 text-sm">{refund.processed_by || 'N/A'}</td>
                   <td className="px-8 py-5 text-center">
                     <button onClick={() => handleViewRefundDetails(refund)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
@@ -684,8 +685,8 @@ export default function SalesHistory({
                             <p className="text-[10px] text-gray-400">ID: {item.product_id}</p>
                           </td>
                           <td className="px-6 py-5 text-center font-bold text-gray-700 text-sm">{item.quantity}</td>
-                          <td className="px-6 py-5 text-right text-gray-700 text-sm">${(item.unit_price || 0).toFixed(2)}</td>
-                          <td className="px-6 py-5 text-right font-bold text-blue-700 text-sm">${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
+                          <td className="px-6 py-5 text-right text-gray-700 text-sm">₱{(item.unit_price || 0).toFixed(2)}</td>
+                          <td className="px-6 py-5 text-right font-bold text-blue-700 text-sm">₱{((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -693,19 +694,19 @@ export default function SalesHistory({
                       <tr>
                         <td colSpan="3" className="px-6 py-2 text-right text-gray-500 text-sm">Net Amount (Excl. VAT):</td>
                         <td className="px-6 py-2 text-right text-gray-700 text-sm">
-                          ${((selectedSale?.total_amount || 0) - (selectedSale?.total_tax || 0)).toFixed(2)}
+                          ₱{((selectedSale?.total_amount || 0) - (selectedSale?.total_tax || 0)).toFixed(2)}
                         </td>
                       </tr>
                       <tr>
                         <td colSpan="3" className="px-6 py-2 text-right text-gray-500 text-sm">VAT (12% Included):</td>
                         <td className="px-6 py-2 text-right text-gray-700 text-sm">
-                          ${(selectedSale?.total_tax || 0).toFixed(2)}
+                          ₱{(selectedSale?.total_tax || 0).toFixed(2)}
                         </td>
                       </tr>
                       <tr>
                         <td colSpan="3" className="px-6 py-4 text-right text-gray-600">Grand Total:</td>
                         <td className="px-6 py-4 text-right text-blue-700 text-lg">
-                          ${(selectedSale?.total_amount || 0).toFixed(2)}
+                          ₱{(selectedSale?.total_amount || 0).toFixed(2)}
                         </td>
                       </tr>
                     </tfoot>
@@ -765,14 +766,14 @@ export default function SalesHistory({
                             <p className="text-[10px] text-gray-400">ID: {item.product_id}</p>
                           </td>
                           <td className="px-6 py-5 text-center font-bold text-red-600 text-sm">{item.quantity_refunded}</td>
-                          <td className="px-6 py-5 text-right font-bold text-red-700 text-sm">-${(item.subtotal || 0).toFixed(2)}</td>
+                          <td className="px-6 py-5 text-right font-bold text-red-700 text-sm">-₱{(item.subtotal || 0).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot className="bg-gray-50/50 font-bold">
                       <tr>
                         <td colSpan="2" className="px-6 py-4 text-right text-gray-600">Total Refunded:</td>
-                        <td className="px-6 py-4 text-right text-red-700 text-lg">-${(selectedRefund?.total_refund_amount || 0).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-right text-red-700 text-lg">-₱{(selectedRefund?.total_refund_amount || 0).toFixed(2)}</td>
                       </tr>
                     </tfoot>
                   </table>

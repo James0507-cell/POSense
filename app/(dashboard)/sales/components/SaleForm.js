@@ -269,7 +269,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
                                   <p className="font-bold text-gray-900 text-sm">{p.name}</p>
                                   <p className="text-xs text-gray-400">Barcode: {p.barcode || 'N/A'}</p>
                                 </div>
-                                <p className="font-bold text-blue-700 text-sm">${(p.selling_price || p.price || 0).toFixed(2)}</p>
+                                <p className="font-bold text-blue-700 text-sm">₱{(p.selling_price || p.price || 0).toFixed(2)}</p>
                               </button>
                             ))}
                           </div>
@@ -357,7 +357,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
                   >
                     <option value="">Quick select...</option>
                     {products.map(p => (
-                      <option key={p.product_id} value={p.product_id}>{p.name} - ${Number(p.selling_price || 0).toFixed(2)}</option>
+                      <option key={p.product_id} value={p.product_id}>{p.name} - ₱{Number(p.selling_price || 0).toFixed(2)}</option>
                     ))}
                   </select>
                 </div>
@@ -377,7 +377,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
                     <div key={item.product_id} className="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
                       <div className="flex-1">
                         <p className="font-bold text-gray-900 text-sm">{item.name}</p>
-                        <p className="text-xs text-gray-500">${Number(item.unit_price).toFixed(2)} each</p>
+                        <p className="text-xs text-gray-500">₱{Number(item.unit_price).toFixed(2)} each</p>
                       </div>
                       <div className="flex items-center gap-3">
                         {!saleId ? (
@@ -407,15 +407,15 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
               <div className="border-t border-gray-200 pt-6 space-y-3">
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>Net Amount (Excl. VAT)</span>
-                  <span>${netAmount.toFixed(2)}</span>
+                  <span>₱{netAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>VAT (12% Included)</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>₱{tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-2">
                   <span className="text-base font-bold text-gray-900">Total Amount (Inclusive)</span>
-                  <span className="text-2xl font-bold text-blue-700">${total.toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-blue-700">₱{total.toFixed(2)}</span>
                 </div>
               </div>
 

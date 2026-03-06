@@ -215,7 +215,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
 
             {/* Cost Price */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Cost Price ($)</label>
+              <label className="text-sm font-bold text-gray-700 ml-1">Cost Price (₱)</label>
               <input
                 type="number"
                 step="0.01"
@@ -230,7 +230,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
 
             {/* Selling Price */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Selling Price (VAT Inclusive) ($)</label>
+              <label className="text-sm font-bold text-gray-700 ml-1">Selling Price (VAT Inclusive) (₱)</label>
               <input
                 type="number"
                 step="0.01"
@@ -247,7 +247,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700 ml-1">VAT Component (12%)</label>
               <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">
-                ${formData.vat}
+                ₱{formData.vat}
               </div>
             </div>
 

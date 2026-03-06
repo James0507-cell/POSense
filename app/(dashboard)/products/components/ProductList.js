@@ -247,14 +247,14 @@ export default function ProductList({ products, onEdit, onDelete, onAdd }) {
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="Min Price"
+              placeholder="Min ₱"
               value={minPrice}
               onChange={(e) => setMinPrice(e.target.value)}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
             />
             <input
               type="number"
-              placeholder="Max Price"
+              placeholder="Max ₱"
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
@@ -350,9 +350,9 @@ export default function ProductList({ products, onEdit, onDelete, onAdd }) {
                       {p.category}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-right font-medium text-gray-700 text-sm">${Number(p.cost_price || p.costPrice || 0).toFixed(2)}</td>
-                  <td className="px-6 py-5 text-right font-bold text-gray-900 text-sm">${Number(p.selling_price || p.sellingPrice || 0).toFixed(2)}</td>
-                  <td className="px-6 py-5 text-right font-medium text-blue-600 text-sm">${Number(p.vat || 0).toFixed(2)}</td>
+                  <td className="px-6 py-5 text-right font-medium text-gray-700 text-sm">₱{Number(p.cost_price || p.costPrice || 0).toFixed(2)}</td>
+                  <td className="px-6 py-5 text-right font-bold text-gray-900 text-sm">₱{Number(p.selling_price || p.sellingPrice || 0).toFixed(2)}</td>
+                  <td className="px-6 py-5 text-right font-medium text-blue-600 text-sm">₱{Number(p.vat || 0).toFixed(2)}</td>
                   <td className="px-6 py-5 text-gray-700 text-sm">{p.created_by || p.createdBy}</td>
                   <td className="px-6 py-5 text-gray-700 text-sm">{p.updated_by || p.updatedBy}</td>
                   <td className="px-6 py-5 text-gray-400 text-xs">{(p.created_at || p.createdAt || '').split(' ')[0]}</td>

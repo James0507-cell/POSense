@@ -186,7 +186,7 @@ export default function ExpensesList({ expenses, categories, onEdit, onDelete, o
             </div>
             <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Expenses Today</p>
             <p className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
-                ${stats.todayExpenses.toFixed(2)}
+                ₱{stats.todayExpenses.toFixed(2)}
             </p>
         </div>
 
@@ -200,7 +200,7 @@ export default function ExpensesList({ expenses, categories, onEdit, onDelete, o
             </div>
             <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Expenses This Month</p>
             <p className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
-                ${stats.monthExpenses.toFixed(2)}
+                ₱{stats.monthExpenses.toFixed(2)}
             </p>
         </div>
 
@@ -214,7 +214,7 @@ export default function ExpensesList({ expenses, categories, onEdit, onDelete, o
             </div>
             <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Avg Expenses This Month</p>
             <p className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
-                ${stats.avgMonthExpenses.toFixed(2)}
+                ₱{stats.avgMonthExpenses.toFixed(2)}
             </p>
         </div>
       </div>
@@ -321,7 +321,7 @@ export default function ExpensesList({ expenses, categories, onEdit, onDelete, o
                     </span>
                   </td>
                   <td className="px-6 py-5 text-gray-700 text-sm max-w-xs truncate">{e.description}</td>
-                  <td className="px-6 py-5 text-right font-bold text-gray-900 text-sm">${Number(e.amount).toFixed(2)}</td>
+                  <td className="px-6 py-5 text-right font-bold text-gray-900 text-sm">₱{Number(e.amount).toFixed(2)}</td>
                   <td className="px-6 py-5 text-gray-500 text-xs">{new Date(e.expense_date).toLocaleDateString()}</td>
                   <td className="px-6 py-5 text-gray-700 text-sm">{e.created_by}</td>
                   <td className="px-6 py-5 text-gray-400 text-xs">{new Date(e.created_at).toLocaleString()}</td>
@@ -412,9 +412,9 @@ export default function ExpensesList({ expenses, categories, onEdit, onDelete, o
                         <tr key={i}>
                           <td className="py-3 text-sm font-medium text-gray-800">{item.item_name}</td>
                           <td className="py-3 text-sm text-gray-600 text-center">{item.quantity}</td>
-                          <td className="py-3 text-sm text-gray-600 text-right">${Number(item.unit_price).toFixed(2)}</td>
+                          <td className="py-3 text-sm text-gray-600 text-right">₱{Number(item.unit_price).toFixed(2)}</td>
                           <td className="py-3 text-sm font-bold text-blue-700 text-right">
-                            ${(item.quantity * item.unit_price).toFixed(2)}
+                            ₱{(item.quantity * item.unit_price).toFixed(2)}
                           </td>
                         </tr>
                       ))}
@@ -422,7 +422,7 @@ export default function ExpensesList({ expenses, categories, onEdit, onDelete, o
                     <tfoot>
                       <tr className="border-t-2 border-gray-100 font-bold">
                         <td colSpan="3" className="py-4 text-right text-gray-900">Total Amount:</td>
-                        <td className="py-4 text-right text-blue-700 text-lg">${Number(viewingItems.amount).toFixed(2)}</td>
+                        <td className="py-4 text-right text-blue-700 text-lg">₱{Number(viewingItems.amount).toFixed(2)}</td>
                       </tr>
                     </tfoot>
                   </table>

@@ -135,7 +135,7 @@ export default function RefundForm({ sale, items, onClose, onSuccess }) {
                       <tr key={item.sales_item_id}>
                         <td className="px-6 py-4">
                           <p className="font-bold text-gray-900 text-sm">{item.name}</p>
-                          <p className="text-xs text-gray-400">${item.unit_price.toFixed(2)} each</p>
+                          <p className="text-xs text-gray-400">₱{item.unit_price.toFixed(2)} each</p>
                         </td>
                         <td className="px-6 py-4 text-center font-bold text-gray-700">{item.quantity}</td>
                         <td className="px-6 py-4 text-center text-red-500 font-bold">{item.already_refunded_quantity || 0}</td>
@@ -152,22 +152,23 @@ export default function RefundForm({ sale, items, onClose, onSuccess }) {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right font-bold text-blue-700">
-                          ${((refundQuantities[item.sales_item_id] || 0) * item.unit_price).toFixed(2)}
+                          ₱{((refundQuantities[item.sales_item_id] || 0) * item.unit_price).toFixed(2)}
                         </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </form>
+                        </tr>
+                        );
+                        })}
+                        </tbody>
+                        </table>
+                        </div>
+                        </div>
+                        </form>
 
-        <div className="p-8 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Refund Amount</p>
-            <p className="text-3xl font-bold text-red-600">-${totalRefundAmount.toFixed(2)}</p>
-          </div>
+                        <div className="p-8 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                        <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Refund Amount</p>
+                        <p className="text-3xl font-bold text-red-600">-₱{totalRefundAmount.toFixed(2)}</p>
+                        </div>
+
           <div className="flex gap-4">
             <button onClick={onClose} className="px-8 py-3 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all">Cancel</button>
             <button 

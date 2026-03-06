@@ -79,7 +79,7 @@ export default function KioskOrderForm({ products, onAddToCart }) {
                           </div>
                         )}
                         <div className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[10px] font-bold text-blue-700 shadow-sm border border-blue-50">
-                          ${Number(product.selling_price || 0).toFixed(2)}
+                          ₱{Number(product.selling_price || 0).toFixed(2)}
                         </div>
                       </div>
                       <h5 className="font-bold text-gray-900 text-sm line-clamp-1 group-hover:text-blue-700 transition-colors">{product.name}</h5>

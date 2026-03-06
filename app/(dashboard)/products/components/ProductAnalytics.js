@@ -299,7 +299,7 @@ export default function ProductAnalytics({
                     <td className="px-8 py-5 font-bold text-gray-900 text-sm">{product.name}</td>
                     <td className="px-8 py-5 text-center text-gray-700 font-bold text-sm">{product.quantity}</td>
                     <td className="px-8 py-5 text-right font-bold text-blue-700 text-sm">
-                      ${product.revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ₱{product.revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
                 ))}

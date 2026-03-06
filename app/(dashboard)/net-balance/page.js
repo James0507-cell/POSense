@@ -246,7 +246,7 @@ export default function NetBalancePage() {
                   total_revenue: stats.totalRevenue,
                   total_expenses: stats.totalExpenses,
                   net_balance: stats.netBalance,
-                  currency: 'USD'
+                  currency: 'PHP'
               }
           },
           history: chatHistory.slice(-10)
@@ -314,7 +314,7 @@ export default function NetBalancePage() {
                         </div>
                         <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Revenue (Month)</p>
                         <p className="text-2xl font-bold text-green-600 font-[family-name:var(--font-outfit)]">
-                          ${stats.totalRevenue.toFixed(2)}
+                          ₱{stats.totalRevenue.toFixed(2)}
                         </p>
                       </div>
 
@@ -328,7 +328,7 @@ export default function NetBalancePage() {
                         </div>
                         <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Expenses (Month)</p>
                         <p className="text-2xl font-bold text-red-600 font-[family-name:var(--font-outfit)]">
-                          ${stats.totalExpenses.toFixed(2)}
+                          ₱{stats.totalExpenses.toFixed(2)}
                         </p>
                       </div>
 
@@ -342,7 +342,7 @@ export default function NetBalancePage() {
                         </div>
                         <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Net Balance (Month)</p>
                         <p className={`text-2xl font-bold font-[family-name:var(--font-outfit)] ${stats.netBalance >= 0 ? 'text-blue-700' : 'text-red-700'}`}>
-                          ${stats.netBalance.toFixed(2)}
+                          ₱{stats.netBalance.toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -403,7 +403,7 @@ export default function NetBalancePage() {
                                 <tr key={s.sale_id} className="hover:bg-gray-50/80 transition-colors">
                                   <td className="px-6 py-5 font-bold text-blue-700 text-sm">{s.sale_id}</td>
                                   <td className="px-6 py-5 text-gray-500 text-xs">{new Date(s.sale_date).toLocaleString()}</td>
-                                  <td className="px-6 py-5 text-sm font-bold text-green-600 text-right">${Number(s.amount_paid).toFixed(2)}</td>
+                                  <td className="px-6 py-5 text-sm font-bold text-green-600 text-right">₱{Number(s.amount_paid).toFixed(2)}</td>
                                 </tr>
                               ))}
                               {filteredSales.length === 0 && (
@@ -474,7 +474,7 @@ export default function NetBalancePage() {
                                   <td className="px-6 py-5 font-bold text-red-500 text-sm">{e.expense_id}</td>
                                   <td className="px-6 py-5 text-sm text-gray-700">{e.description}</td>
                                   <td className="px-6 py-5 text-gray-500 text-xs">{new Date(e.expense_date).toLocaleString()}</td>
-                                  <td className="px-6 py-5 text-sm font-bold text-red-600 text-right">${Number(e.amount).toFixed(2)}</td>
+                                  <td className="px-6 py-5 text-sm font-bold text-red-600 text-right">₱{Number(e.amount).toFixed(2)}</td>
                                 </tr>
                               ))}
                               {filteredExpenses.length === 0 && (

@@ -141,7 +141,7 @@ export default function Dashboard() {
       y: {
         beginAtZero: true,
         grid: { color: '#f3f4f6' },
-        ticks: { callback: (value) => `$${value}`, font: { weight: '600' } },
+        ticks: { callback: (value) => `₱${value}`, font: { weight: '600' } },
       },
       x: { grid: { display: false }, ticks: { font: { weight: '600' } } },
     },
