@@ -4,9 +4,9 @@ import { supabase } from '../../dbManager.js';
 export async function GET() {
     try {
         const { data, error } = await supabase
-            .from('expense_categories')
+            .from('brands')
             .select('*')
-            .order('category_name', { ascending: true });
+            .order('name', { ascending: true });
 
         if (error) throw error;
         return NextResponse.json(data);
@@ -18,10 +18,10 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { category_name, description, created_by, status } = body;
+        const { name, description, created_by, status } = body;
         const { data, error } = await supabase
-            .from('expense_categories')
-            .insert([{ category_name, description, created_by, status: status || 'Active' }])
+            .from('brands')
+            .insert([{ name, description, created_by, status: status || 'Active' }])
             .select();
 
         if (error) throw error;
@@ -34,11 +34,11 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const body = await request.json();
-        const { category_id, category_name, description, updated_by, status } = body;
+        const { brand_id, name, description, updated_by, status } = body;
         const { data, error } = await supabase
-            .from('expense_categories')
-            .update({ category_name, description, updated_by, status })
-            .eq('category_id', category_id)
+            .from('brands')
+            .update({ name, description, updated_by, status })
+            .eq('brand_id', brand_id)
             .select();
 
         if (error) throw error;
@@ -53,9 +53,9 @@ export async function DELETE(request) {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
         const { error } = await supabase
-            .from('expense_categories')
+            .from('brands')
             .delete()
-            .eq('category_id', id);
+            .eq('brand_id', id);
 
         if (error) throw error;
         return NextResponse.json({ success: true });

@@ -22,11 +22,12 @@ export default function DashboardLayout({ children }) {
     '/expenses': 'Expenses Tracking',
     '/net-balance': 'Net Balance & Cashflow',
     '/audit': 'Audit Logs & Activity',
-    '/employees': 'Employee Records'
+    '/employees': 'Employee Records',
+    '/settings': 'System Configuration'
   };
 
   const rolePermissions = {
-    'Admin': ['/dashboard', '/products', '/inventory', '/inventory-list', '/sales', '/sales-records', '/expenses', '/net-balance', '/audit', '/employees'],
+    'Admin': ['/dashboard', '/products', '/inventory', '/inventory-list', '/sales', '/sales-records', '/expenses', '/net-balance', '/audit', '/employees', '/settings'],
     'Store Manager': ['/dashboard', '/products', '/inventory', '/sales', '/expenses', '/net-balance', '/audit'],
     'Products and Inventory Manager': ['/products', '/inventory'],
     'Sales & Expense Analyst': ['/sales', '/expenses', '/net-balance'],

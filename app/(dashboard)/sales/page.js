@@ -68,7 +68,8 @@ function SalesContent() {
         const types = await typesRes.json();
         const productData = await productsRes.json();
         
-        setPaymentTypes(types);
+        // Pre-filter types for the UI forms (only Active ones)
+        setPaymentTypes(types); 
         setProducts(productData);
         setRefundsData(refunds);
         setSalesData(enrichSalesData(sales, types));

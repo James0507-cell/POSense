@@ -27,7 +27,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
     // Fetch brands for the dropdown
     async function fetchBrands() {
         try {
-            const response = await fetch('/api/db-query?q=SELECT brand_id, name FROM brands');
+            const response = await fetch('/api/brands');
             if (response.ok) {
                 const data = await response.json();
                 setBrands(data);
@@ -167,7 +167,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
                 className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
               >
                 <option value="">Select Brand</option>
-                {brands.map(brand => (
+                {brands.filter(b => b.status === 'Active' || b.brand_id === formData.brand_id).map(brand => (
                   <option key={brand.brand_id} value={brand.brand_id}>{brand.name}</option>
                 ))}
               </select>

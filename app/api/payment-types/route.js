@@ -3,21 +3,63 @@ import { supabase } from '../../dbManager.js';
 
 export async function GET() {
     try {
-        console.log("Fetching all columns from paymenttype table...");
         const { data, error } = await supabase
             .from('paymenttypes')
-            .select('*');
+            .select('*')
+            .order('payment_name', { ascending: true });
 
-        if (error) {
-            console.error("Supabase error in GET /api/payment-types:", error);
-            return NextResponse.json([]);
-        }
-
-        console.log("Payment types retrieved from DB:", data);
-        
+        if (error) throw error;
         return NextResponse.json(data || []);
     } catch (error) {
-        console.error("Unexpected error in GET /api/payment-types:", error);
-        return NextResponse.json([]);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function POST(request) {
+    try {
+        const body = await request.json();
+        const { payment_name, description, status } = body;
+        const { data, error } = await supabase
+            .from('paymenttypes')
+            .insert([{ payment_name, description, status: status || 'Active' }])
+            .select();
+
+        if (error) throw error;
+        return NextResponse.json(data[0]);
+    } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function PUT(request) {
+    try {
+        const body = await request.json();
+        const { payment_type_id, payment_name, description, status } = body;
+        const { data, error } = await supabase
+            .from('paymenttypes')
+            .update({ payment_name, description, status })
+            .eq('payment_type_id', payment_type_id)
+            .select();
+
+        if (error) throw error;
+        return NextResponse.json(data[0]);
+    } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+        const { error } = await supabase
+            .from('paymenttypes')
+            .delete()
+            .eq('payment_type_id', id);
+
+        if (error) throw error;
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

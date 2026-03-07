@@ -8,7 +8,11 @@ import KioskOrderForm from './KioskOrderForm';
 export default function SaleForm({ sale = null, products = [], paymentTypes = [], onClose, onSuccess, isInline = false, initialViewMode = 'standard' }) {
   const [cart, setCart] = useState([]);
   const [viewMode, setViewMode] = useState(initialViewMode); // 'standard' or 'kiosk'
-  const [paymentType, setPaymentType] = useState(sale?.payment_type || 'Cash');
+  const [paymentType, setPaymentType] = useState(() => {
+    if (sale?.payment_type) return sale.payment_type;
+    const firstActive = paymentTypes.find(t => t.status === 'Active');
+    return firstActive ? (firstActive.payment_name || firstActive.name) : 'Cash';
+  });
   const [status, setStatus] = useState(sale?.status || 'confirmed');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
@@ -319,7 +323,7 @@ export default function SaleForm({ sale = null, products = [], paymentTypes = []
                     disabled={!!saleId}
                     className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-700/20 focus:border-blue-700 transition-all disabled:opacity-60"
                   >
-                    {paymentTypes.map((type, idx) => (
+                    {paymentTypes.filter(t => t.status === 'Active' || t.payment_name === paymentType || t.name === paymentType).map((type, idx) => (
                       <option key={type.payment_type_id || idx} value={type.payment_name || type.name}>{type.payment_name || type.name}</option>
                     ))}
                   </select>
