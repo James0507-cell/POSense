@@ -139,32 +139,32 @@ export default function ProductForm({ product, onClose, onSuccess }) {
       ></div>
       
       {/* Modal Card */}
-      <div className="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300 ease-out border border-gray-100 flex flex-col">
-        <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+      <div className="relative bg-white rounded-2xl md:rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300 ease-out border border-gray-100 flex flex-col max-h-[95vh]">
+        <div className="p-5 md:p-8 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">
               {product ? 'Edit Product' : 'Add New Product'}
             </h3>
-            <p className="text-sm text-gray-500 mt-1">Enter product specifications and pricing</p>
+            <p className="text-xs md:text-sm text-gray-500 mt-1">Enter product specifications and pricing</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-colors">
-            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+            <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="p-5 md:p-8 space-y-4 md:space-y-6 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Brand Selection */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Brand</label>
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Brand</label>
               <select
                 name="brand_id"
                 value={formData.brand_id}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
               >
                 <option value="">Select Brand</option>
                 {brands.map(brand => (
@@ -174,8 +174,8 @@ export default function ProductForm({ product, onClose, onSuccess }) {
             </div>
 
             {/* Product Name */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Product Name</label>
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Product Name</label>
               <input
                 type="text"
                 name="name"
@@ -183,39 +183,39 @@ export default function ProductForm({ product, onClose, onSuccess }) {
                 onChange={handleChange}
                 required
                 placeholder="e.g. Smart Camera Pro"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
               />
             </div>
 
             {/* Barcode */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Barcode / SKU</label>
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Barcode / SKU</label>
               <input
                 type="text"
                 name="barcode"
                 value={formData.barcode}
                 onChange={handleChange}
                 placeholder="Scan or enter barcode"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all font-mono"
+                className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all font-mono"
               />
             </div>
 
             {/* Category */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Category</label>
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Category</label>
               <input
                 type="text"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
                 placeholder="e.g. Electronics"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
               />
             </div>
 
             {/* Cost Price */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Cost Price (₱)</label>
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Cost Price (₱)</label>
               <input
                 type="number"
                 step="0.01"
@@ -224,13 +224,13 @@ export default function ProductForm({ product, onClose, onSuccess }) {
                 onChange={handleChange}
                 required
                 placeholder="0.00"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
               />
             </div>
 
             {/* Selling Price */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Selling Price (VAT Inclusive) (₱)</label>
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Selling Price (VAT Inclusive) (₱)</label>
               <input
                 type="number"
                 step="0.01"
@@ -239,27 +239,27 @@ export default function ProductForm({ product, onClose, onSuccess }) {
                 onChange={handleChange}
                 required
                 placeholder="0.00"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
               />
             </div>
 
             {/* VAT (Calculated) */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">VAT Component (12%)</label>
-              <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">VAT Component (12%)</label>
+              <div className="w-full px-4 py-2.5 md:py-3 bg-gray-100 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm text-gray-500 font-bold">
                 ₱{formData.vat}
               </div>
             </div>
 
             {/* Image Upload */}
-            <div className="space-y-2 col-span-1 md:col-span-2">
-              <label className="text-sm font-bold text-gray-700 ml-1">Product Image</label>
+            <div className="space-y-1 md:space-y-2 col-span-1 md:col-span-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Product Image</label>
               <div className="flex items-center gap-4">
                 {formData.image_url ? (
-                  <img src={formData.image_url} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-gray-100" />
+                  <img src={formData.image_url} alt="Preview" className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg md:rounded-xl border border-gray-100" />
                 ) : (
-                  <div className="w-20 h-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-50 rounded-lg md:rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400">
+                    <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -270,42 +270,42 @@ export default function ProductForm({ product, onClose, onSuccess }) {
                     accept="image/*"
                     onChange={handleFileUpload}
                     disabled={uploading}
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                    className="w-full text-[10px] md:text-sm text-gray-500 file:mr-2 md:file:mr-4 file:py-1.5 md:file:py-2 file:px-3 md:file:px-4 file:rounded-lg md:file:rounded-xl file:border-0 file:text-[10px] md:file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                   />
-                  {uploading && <p className="text-xs text-blue-600 mt-1 font-bold">Uploading...</p>}
+                  {uploading && <p className="text-[10px] md:text-xs text-blue-600 mt-1 font-bold">Uploading...</p>}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Description */}
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700 ml-1">Description</label>
+          <div className="space-y-1 md:space-y-2">
+            <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows="3"
+              rows="2 md:3"
               placeholder="Provide product details..."
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all resize-none"
+              className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all resize-none"
             ></textarea>
           </div>
 
-          <div className="pt-4 flex gap-4">
+          <div className="pt-2 md:pt-4 flex gap-3 md:gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3.5 border border-gray-200 text-gray-600 rounded-2xl text-sm font-bold hover:bg-gray-50 transition-all"
+              className="flex-1 px-4 md:px-6 py-3 md:py-3.5 border border-gray-200 text-gray-600 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold hover:bg-gray-50 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3.5 bg-blue-700 text-white rounded-2xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 md:px-6 py-3 md:py-3.5 bg-blue-700 text-white rounded-xl md:rounded-2xl text-xs md:text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
-              {product ? 'Update Product' : 'Add Product'}
+              {loading && <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+              {product ? 'Update' : 'Add Product'}
             </button>
           </div>
         </form>

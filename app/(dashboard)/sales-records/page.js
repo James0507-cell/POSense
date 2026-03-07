@@ -65,7 +65,7 @@ function SalesRecordsContent() {
   }, []);
 
   return (
-    <div className="p-10 space-y-8 animate-fade-in">
+    <div className="p-4 md:p-10 space-y-6 md:space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Sales & Refund Records</h1>

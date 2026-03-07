@@ -6,12 +6,46 @@ import { useRouter } from 'next/navigation';
 const LoginPage = () => {
     const router = useRouter();
 
+    // Auto-login check
+    React.useEffect(() => {
+        const employeeId = localStorage.getItem('employee_id') || sessionStorage.getItem('employee_id');
+        const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+
+        if (employeeId && role) {
+            redirectByRole(role);
+        }
+    }, []);
+
+    const redirectByRole = (role) => {
+        switch (role) {
+            case 'Admin':
+            case 'Store Manager':
+                router.push('/dashboard');
+                break;
+            case 'Products and Inventory Manager':
+                router.push('/products');
+                break;
+            case 'Sales & Expense Analyst':
+                router.push('/sales');
+                break;
+            case 'Cashier':
+                router.push('/sales-records');
+                break;
+            case 'Inventory Clerk':
+                router.push('/inventory-list');
+                break;
+            default:
+                router.push('/dashboard');
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const formData = new FormData(e.target);
         const usernameValue = formData.get('username');
         const passwordValue = formData.get('password');
+        const rememberMe = formData.get('remember') === 'on';
 
         const response = await fetch('/api/login', {
             method: 'POST',
@@ -28,36 +62,21 @@ const LoginPage = () => {
             return;
         } else {
             const data = await response.json();
-            // The API returns an array of employees
             if (data && data.length > 0) {
                 const employee = data[0];
-                sessionStorage.setItem('employee_id', employee.employee_id);
-                sessionStorage.setItem('first_name', employee.first_name);
-                sessionStorage.setItem('last_name', employee.last_name);
-                sessionStorage.setItem('email', employee.email);
-                sessionStorage.setItem('role', employee.role);
+                const storage = rememberMe ? localStorage : sessionStorage;
+                
+                // Clear other storage to avoid conflicts
+                const otherStorage = rememberMe ? sessionStorage : localStorage;
+                ['employee_id', 'first_name', 'last_name', 'email', 'role'].forEach(key => otherStorage.removeItem(key));
 
-                // Role-based redirection
-                switch (employee.role) {
-                    case 'Admin':
-                    case 'Store Manager':
-                        router.push('/dashboard');
-                        break;
-                    case 'Products and Inventory Manager':
-                        router.push('/products');
-                        break;
-                    case 'Sales & Expense Analyst':
-                        router.push('/sales');
-                        break;
-                    case 'Cashier':
-                        router.push('/sales-records');
-                        break;
-                    case 'Inventory Clerk':
-                        router.push('/inventory-list');
-                        break;
-                    default:
-                        router.push('/dashboard');
-                }
+                storage.setItem('employee_id', employee.employee_id);
+                storage.setItem('first_name', employee.first_name);
+                storage.setItem('last_name', employee.last_name);
+                storage.setItem('email', employee.email);
+                storage.setItem('role', employee.role);
+
+                redirectByRole(employee.role);
             }
         }
     };
@@ -87,19 +106,8 @@ const LoginPage = () => {
                     </h2>
                     
                     <p className="text-xl font-light leading-relaxed text-blue-100 opacity-90 max-w-md">
-                        Transform your checkout into a data powerhouse. Our AI analyzes every transaction to reveal insights that grow your profit.
+                        Transform your records into a data powerhouse. Our AI analyzes every record to reveal insights that grow your profit.
                     </p>
-
-                    <div className="mt-12 grid grid-cols-2 gap-8 border-t border-blue-800/50 pt-10">
-                        <div>
-                            <p className="text-3xl font-bold">24/7</p>
-                            <p className="text-sm text-blue-300 uppercase tracking-widest mt-1">AI Monitoring</p>
-                        </div>
-                        <div>
-                            <p className="text-3xl font-bold">15%</p>
-                            <p className="text-sm text-blue-300 uppercase tracking-widest mt-1">Avg. Growth</p>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -145,13 +153,10 @@ const LoginPage = () => {
                         </div>
 
                         <div>
-                            <div className="flex justify-between mb-2">
+                            <div className="mb-2">
                                 <label className="text-sm font-bold text-gray-700 uppercase tracking-wide" htmlFor="password">
                                     Password
                                 </label>
-                                <a href="#" className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors">
-                                    Forgot password?
-                                </a>
                             </div>
                             <input
                                 id="password"
@@ -166,6 +171,7 @@ const LoginPage = () => {
                         <div className="flex items-center">
                             <input
                                 id="remember"
+                                name="remember"
                                 type="checkbox"
                                 className="w-5 h-5 text-blue-600 border-gray-300 rounded-lg focus:ring-blue-500 cursor-pointer"
                             />
@@ -184,15 +190,6 @@ const LoginPage = () => {
                             </svg>
                         </button>
                     </form>
-
-                    <div className="mt-12 text-center pt-8 border-t border-gray-100">
-                        <p className="text-gray-500 font-medium">
-                            Don&apos;t have an account yet?{' '}
-                            <a href="#" className="text-blue-700 font-bold hover:text-blue-900 transition-colors underline underline-offset-4">
-                                Join POSense
-                            </a>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>

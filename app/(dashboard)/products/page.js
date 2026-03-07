@@ -200,9 +200,9 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="p-10 space-y-8 animate-fade-in">
+    <div className="p-4 md:p-10 space-y-6 md:space-y-8 animate-fade-in">
       {/* Tabs Navigation */}
-          <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
+          <div className="flex gap-1 md:gap-2 p-1 bg-gray-100 rounded-2xl w-fit max-w-full overflow-x-auto">
             {[
               { id: 'list', label: 'Products List', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
               { id: 'analytics', label: 'Analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
@@ -211,13 +211,13 @@ export default function ProductsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                className={`flex items-center gap-2 px-3 md:px-6 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-white text-blue-700 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
                 }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={tab.icon} />
                 </svg>
                 {tab.label}

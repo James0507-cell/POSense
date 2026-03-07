@@ -199,6 +199,29 @@ export default function SalesHistory({
     link.click();
   };
 
+  const handleExportRefunds = () => {
+    if (filteredRefunds.length === 0) return;
+    const headers = ['Refund ID', 'Sale ID', 'Date', 'Type', 'Refund Amount', 'Processed By'];
+    const csvRows = [
+      headers.join(','),
+      ...filteredRefunds.map(refund => [
+        refund.refund_id,
+        refund.sale_id,
+        refund.created_at,
+        `"${String(refund.refund_type || '').replace(/"/g, '""')}"`,
+        refund.total_refund_amount || 0,
+        `"${String(refund.processed_by || '').replace(/"/g, '""')}"`
+      ].join(','))
+    ];
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `refunds_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.click();
+  };
+
   const handlePrintSale = (sale, items) => {
     const printWindow = window.open('', '_blank');
     const id = sale.sale_id || sale.sales_id || sale.id || sale['sales id'];
@@ -494,12 +517,22 @@ export default function SalesHistory({
 
       {/* Sales Table */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-5 md:p-8 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Sales History</h4>
-          <div className="flex gap-3">
-            <button onClick={onNewSale} className="px-6 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 shadow-lg shadow-blue-100 transition-all">New Sale</button>
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+            <button 
+              onClick={onNewSale} 
+              className="px-6 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 shadow-lg shadow-blue-100 transition-all whitespace-nowrap shrink-0"
+            >
+              New Sale
+            </button>
             {!hideExport && (
-              <button onClick={handleExport} className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50">Export CSV</button>
+              <button 
+                onClick={handleExport} 
+                className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 whitespace-nowrap shrink-0"
+              >
+                Export CSV
+              </button>
             )}
           </div>
         </div>
@@ -590,8 +623,16 @@ export default function SalesHistory({
 
       {/* Refunds Table */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-100">
+        <div className="p-5 md:p-8 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Refunds List</h4>
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+            <button 
+              onClick={handleExportRefunds} 
+              className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all whitespace-nowrap shrink-0"
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
           <table className="w-full text-left">

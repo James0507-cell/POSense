@@ -73,18 +73,18 @@ function EmployeesContent() {
   };
 
   return (
-    <div className="p-10 space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-10 space-y-6 md:space-y-8 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Employee Records</h1>
-          <p className="text-gray-500 font-medium mt-1">Manage staff information, roles, and system access</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Employee Records</h1>
+          <p className="text-xs md:text-sm text-gray-500 font-medium mt-1">Manage staff information, roles, and system access</p>
         </div>
         <button 
           onClick={handleAddEmployee}
-          className="bg-blue-700 text-white px-8 py-4 rounded-2xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-100 flex items-center gap-2"
+          className="bg-blue-700 text-white px-4 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2 whitespace-nowrap"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-          Add New Employee
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+          <span>Add Employee</span>
         </button>
       </div>
 

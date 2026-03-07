@@ -185,7 +185,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-10 space-y-8 animate-fade-in">
+    <div className="p-4 md:p-10 space-y-4 md:space-y-8 animate-fade-in">
       <DashboardOverview 
           stats={stats}
           barData={barData}

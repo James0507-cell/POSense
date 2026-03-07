@@ -48,7 +48,7 @@ const ExportButton = ({ chartRef, fileName, exportPng, exportPdf }) => (
           className="w-full text-left px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
         >
           <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           PNG Image
         </button>
@@ -267,9 +267,9 @@ export default function NetBalancePage() {
   };
 
   return (
-    <div className="p-10 space-y-8 animate-fade-in">
+    <div className="p-4 md:p-10 space-y-6 md:space-y-8 animate-fade-in">
       {/* Tabs Navigation */}
-          <div className="flex gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
+          <div className="flex gap-1 md:gap-2 p-1 bg-gray-100 rounded-2xl w-fit max-w-full overflow-x-auto">
             {[
               { id: 'summary', label: 'Summary List', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
               { id: 'analytics', label: 'Analytics', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
@@ -278,13 +278,13 @@ export default function NetBalancePage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                className={`flex items-center gap-2 px-3 md:px-6 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-white text-blue-700 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
                 }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={tab.icon} />
                 </svg>
                 {tab.label}
@@ -304,44 +304,44 @@ export default function NetBalancePage() {
                   <div className="space-y-8">
                     {/* Metric Cards - Moved inside Summary Tab */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                        <div className="flex items-center justify-between mb-5">
-                          <div className="p-3 rounded-2xl bg-green-50 group-hover:bg-green-100 transition-colors">
-                            <svg className="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="bg-white p-5 md:p-7 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                        <div className="flex items-center justify-between mb-4 md:mb-5">
+                          <div className="p-3 rounded-xl md:rounded-2xl bg-green-50 group-hover:bg-green-100 transition-colors">
+                            <svg className="w-5 h-5 md:w-6 md:h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </div>
                         </div>
-                        <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Revenue (Month)</p>
-                        <p className="text-2xl font-bold text-green-600 font-[family-name:var(--font-outfit)]">
+                        <p className="text-gray-500 text-xs md:text-sm font-semibold uppercase tracking-wider mb-1">Total Revenue (Month)</p>
+                        <p className="text-xl md:text-2xl font-bold text-green-600 font-[family-name:var(--font-outfit)]">
                           ₱{stats.totalRevenue.toFixed(2)}
                         </p>
                       </div>
 
-                      <div className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                        <div className="flex items-center justify-between mb-5">
-                          <div className="p-3 rounded-2xl bg-red-50 group-hover:bg-red-100 transition-colors">
-                            <svg className="w-6 h-6 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="bg-white p-5 md:p-7 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                        <div className="flex items-center justify-between mb-4 md:mb-5">
+                          <div className="p-3 rounded-xl md:rounded-2xl bg-red-50 group-hover:bg-red-100 transition-colors">
+                            <svg className="w-5 h-5 md:w-6 md:h-6 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                           </div>
                         </div>
-                        <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Total Expenses (Month)</p>
-                        <p className="text-2xl font-bold text-red-600 font-[family-name:var(--font-outfit)]">
+                        <p className="text-gray-500 text-xs md:text-sm font-semibold uppercase tracking-wider mb-1">Total Expenses (Month)</p>
+                        <p className="text-xl md:text-2xl font-bold text-red-600 font-[family-name:var(--font-outfit)]">
                           ₱{stats.totalExpenses.toFixed(2)}
                         </p>
                       </div>
 
-                      <div className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                        <div className="flex items-center justify-between mb-5">
-                          <div className="p-3 rounded-2xl bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                            <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="bg-white p-5 md:p-7 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                        <div className="flex items-center justify-between mb-4 md:mb-5">
+                          <div className="p-3 rounded-xl md:rounded-2xl bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                            <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                           </div>
                         </div>
-                        <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Net Balance (Month)</p>
-                        <p className={`text-2xl font-bold font-[family-name:var(--font-outfit)] ${stats.netBalance >= 0 ? 'text-blue-700' : 'text-red-700'}`}>
+                        <p className="text-gray-500 text-xs md:text-sm font-semibold uppercase tracking-wider mb-1">Net Balance (Month)</p>
+                        <p className={`text-xl md:text-2xl font-bold font-[family-name:var(--font-outfit)] ${stats.netBalance >= 0 ? 'text-blue-700' : 'text-red-700'}`}>
                           ₱{stats.netBalance.toFixed(2)}
                         </p>
                       </div>
@@ -351,7 +351,7 @@ export default function NetBalancePage() {
                     {/* Sales Section */}
                     <div className="space-y-4">
                       {/* Sales Filters */}
-                      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                      <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                           <div className="relative lg:col-span-2">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -373,42 +373,42 @@ export default function NetBalancePage() {
                               type="date"
                               value={salesDateRange.from}
                               onChange={(e) => setSalesDateRange(prev => ({...prev, from: e.target.value}))}
-                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
                             />
                             <input
                               type="date"
                               value={salesDateRange.to}
                               onChange={(e) => setSalesDateRange(prev => ({...prev, to: e.target.value}))}
-                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
                             />
                           </div>
                         </div>
                       </div>
 
-                      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="p-8 border-b border-gray-100">
-                          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Confirmed Sales</h4>
+                      <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="p-5 md:p-8 border-b border-gray-100">
+                          <h4 className="text-lg md:text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Confirmed Sales</h4>
                         </div>
                         <div className="overflow-x-auto max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
                           <table className="w-full text-left">
                             <thead className="sticky top-0 bg-white z-10 shadow-sm">
                               <tr className="bg-gray-50/50">
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Sale ID</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Amount Paid</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">Sale ID</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Amount Paid</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                               {filteredSales.slice(0, 10).map(s => (
                                 <tr key={s.sale_id} className="hover:bg-gray-50/80 transition-colors">
-                                  <td className="px-6 py-5 font-bold text-blue-700 text-sm">{s.sale_id}</td>
-                                  <td className="px-6 py-5 text-gray-500 text-xs">{new Date(s.sale_date).toLocaleString()}</td>
-                                  <td className="px-6 py-5 text-sm font-bold text-green-600 text-right">₱{Number(s.amount_paid).toFixed(2)}</td>
+                                  <td className="px-6 py-5 font-bold text-blue-700 text-xs md:text-sm">{s.sale_id}</td>
+                                  <td className="px-6 py-5 text-gray-500 text-[10px] md:text-xs">{new Date(s.sale_date).toLocaleString()}</td>
+                                  <td className="px-6 py-5 text-xs md:text-sm font-bold text-green-600 text-right">₱{Number(s.amount_paid).toFixed(2)}</td>
                                 </tr>
                               ))}
                               {filteredSales.length === 0 && (
                                 <tr>
-                                  <td colSpan="3" className="px-6 py-10 text-center text-gray-500 font-medium">No sales found.</td>
+                                  <td colSpan="3" className="px-6 py-10 text-center text-gray-500 font-medium text-sm">No sales found.</td>
                                 </tr>
                               )}
                             </tbody>
@@ -420,7 +420,7 @@ export default function NetBalancePage() {
                     {/* Expenses Section */}
                     <div className="space-y-4">
                       {/* Expenses Filters */}
-                      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                      <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                           <div className="relative lg:col-span-2">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -442,44 +442,44 @@ export default function NetBalancePage() {
                               type="date"
                               value={expensesDateRange.from}
                               onChange={(e) => setExpensesDateRange(prev => ({...prev, from: e.target.value}))}
-                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
                             />
                             <input
                               type="date"
                               value={expensesDateRange.to}
                               onChange={(e) => setExpensesDateRange(prev => ({...prev, to: e.target.value}))}
-                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+                              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
                             />
                           </div>
                         </div>
                       </div>
 
-                      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="p-8 border-b border-gray-100">
-                          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Expenses Records</h4>
+                      <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="p-5 md:p-8 border-b border-gray-100">
+                          <h4 className="text-lg md:text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Expenses Records</h4>
                         </div>
                         <div className="overflow-x-auto max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
                           <table className="w-full text-left">
                             <thead className="sticky top-0 bg-white z-10 shadow-sm">
                               <tr className="bg-gray-50/50">
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Exp ID</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Description</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Amount</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">Exp ID</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">Description</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Amount</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                               {filteredExpenses.slice(0, 10).map(e => (
                                 <tr key={e.expense_id} className="hover:bg-gray-50/80 transition-colors">
-                                  <td className="px-6 py-5 font-bold text-red-500 text-sm">{e.expense_id}</td>
-                                  <td className="px-6 py-5 text-sm text-gray-700">{e.description}</td>
-                                  <td className="px-6 py-5 text-gray-500 text-xs">{new Date(e.expense_date).toLocaleString()}</td>
-                                  <td className="px-6 py-5 text-sm font-bold text-red-600 text-right">₱{Number(e.amount).toFixed(2)}</td>
+                                  <td className="px-6 py-5 font-bold text-red-500 text-xs md:text-sm">{e.expense_id}</td>
+                                  <td className="px-6 py-5 text-xs md:text-sm text-gray-700">{e.description}</td>
+                                  <td className="px-6 py-5 text-gray-500 text-[10px] md:text-xs">{new Date(e.expense_date).toLocaleString()}</td>
+                                  <td className="px-6 py-5 text-xs md:text-sm font-bold text-red-600 text-right">₱{Number(e.amount).toFixed(2)}</td>
                                 </tr>
                               ))}
                               {filteredExpenses.length === 0 && (
                                 <tr>
-                                  <td colSpan="4" className="px-6 py-10 text-center text-gray-500 font-medium">No expenses found.</td>
+                                  <td colSpan="4" className="px-6 py-10 text-center text-gray-500 font-medium text-sm">No expenses found.</td>
                                 </tr>
                               )}
                             </tbody>
@@ -491,22 +491,22 @@ export default function NetBalancePage() {
                 </div>
                 )}
                 {activeTab === 'analytics' && (
-                  <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8 group">
-                    <div className="flex items-center justify-between">
+                  <div className="bg-white p-5 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6 md:space-y-8 group">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <h4 className="text-xl font-bold text-gray-900">Cashflow Analysis</h4>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
                         <ExportButton 
                           chartRef={cashflowChartRef} 
                           fileName="cashflow_analysis" 
                           exportPng={exportChartPng} 
                           exportPdf={exportChartPdf} 
                         />
-                        <div className="flex gap-2 p-1 bg-gray-50 rounded-xl">
+                        <div className="flex gap-2 p-1 bg-gray-50 rounded-xl shrink-0">
                           {['day', 'week', 'month'].map(unit => (
                             <button 
                               key={unit}
                               onClick={() => setTimeUnit(unit)}
-                              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${timeUnit === unit ? 'bg-white shadow-sm text-blue-700' : 'text-gray-400 hover:text-gray-600'}`}
+                              className={`px-3 md:px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all ${timeUnit === unit ? 'bg-white shadow-sm text-blue-700' : 'text-gray-400 hover:text-gray-600'}`}
                             >
                               {unit.toUpperCase()}
                             </button>
@@ -514,7 +514,7 @@ export default function NetBalancePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="h-[400px]">
+                    <div className="h-[300px] md:h-[400px]">
                       <Line 
                         ref={cashflowChartRef}
                         data={chartData} 

@@ -40,7 +40,7 @@ function InventoryListContent() {
   };
 
   return (
-    <div className="p-10 space-y-8 animate-fade-in">
+    <div className="p-4 md:p-10 space-y-6 md:space-y-8 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">Stock Inventory List</h1>
         <p className="text-gray-500 font-medium mt-1">View and adjust current stock levels across all locations</p>

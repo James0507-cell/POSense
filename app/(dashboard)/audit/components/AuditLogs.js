@@ -39,10 +39,32 @@ export default function AuditLogs() {
     }
   };
 
+  const handleExport = () => {
+    if (logs.length === 0) return;
+    const headers = ['Timestamp', 'Performed By', 'Action', 'Table', 'Record ID'];
+    const csvRows = [
+      headers.join(','),
+      ...logs.map(log => [
+        new Date(log.changed_at).toLocaleString().replace(/,/g, ''),
+        `"${String(log.actor_name || '').replace(/"/g, '""')}"`,
+        `"${String(log.action_type || '').replace(/"/g, '""')}"`,
+        `"${String(log.table_name || '').replace(/"/g, '""')}"`,
+        log.record_id
+      ].join(','))
+    ];
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `audit_logs_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.click();
+  };
+
   return (
-    <div className="p-10 space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Filters Bar */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+      <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <div className="relative lg:col-span-2">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -59,11 +81,11 @@ export default function AuditLogs() {
             />
           </div>
           <div className="flex gap-2 lg:col-span-2">
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none" />
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm outline-none" />
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm outline-none" />
           </div>
           <div>
-            <select value={actionType} onChange={(e) => setActionType(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer text-gray-700">
+            <select value={actionType} onChange={(e) => setActionType(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs md:text-sm font-bold outline-none cursor-pointer text-gray-700">
               <option value="all">All Actions</option>
               <option value="INSERT">INSERT</option>
               <option value="UPDATE">UPDATE</option>
@@ -74,40 +96,48 @@ export default function AuditLogs() {
       </div>
 
       {/* Audit List */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-100">
-          <h4 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">System Activity Audit</h4>
+      <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="p-5 md:p-8 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h4 className="text-lg md:text-xl font-bold text-gray-900 font-[family-name:var(--font-outfit)]">System Activity Audit</h4>
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+            <button 
+              onClick={handleExport} 
+              className="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all whitespace-nowrap shrink-0"
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
         {loading ? (
           <div className="p-20 text-center animate-pulse">
             <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">Loading activity logs...</p>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-xs md:text-sm">Loading activity logs...</p>
           </div>
         ) : (
           <div className="overflow-x-auto max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
             <table className="w-full text-left">
               <thead className="sticky top-0 bg-white z-10 shadow-sm">
                 <tr className="bg-gray-50/50">
-                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Timestamp</th>
-                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Performed By</th>
-                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Action</th>
-                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Table</th>
-                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase">Record ID</th>
-                  <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase text-center">Actions</th>
+                  <th className="px-5 md:px-8 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase">Timestamp</th>
+                  <th className="px-5 md:px-8 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase">Performed By</th>
+                  <th className="px-5 md:px-8 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase">Action</th>
+                  <th className="px-5 md:px-8 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase">Table</th>
+                  <th className="px-5 md:px-8 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase">Record ID</th>
+                  <th className="px-5 md:px-8 py-4 text-[10px] md:text-xs font-bold text-gray-400 uppercase text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {logs.map((log) => (
                   <tr key={log.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-8 py-5">
-                      <p className="font-bold text-gray-900 text-sm">{new Date(log.changed_at).toLocaleString()}</p>
+                    <td className="px-5 md:px-8 py-4 md:py-5">
+                      <p className="font-bold text-gray-900 text-xs md:text-sm">{new Date(log.changed_at).toLocaleString()}</p>
                     </td>
-                    <td className="px-8 py-5">
-                      <p className="font-bold text-gray-700 text-sm">{log.actor_name}</p>
+                    <td className="px-5 md:px-8 py-4 md:py-5">
+                      <p className="font-bold text-gray-700 text-xs md:text-sm">{log.actor_name}</p>
                     </td>
-                    <td className="px-8 py-5">
+                    <td className="px-5 md:px-8 py-4 md:py-5">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
                         log.action_type === 'INSERT' ? 'bg-green-100 text-green-700' :
                         log.action_type === 'DELETE' ? 'bg-red-100 text-red-700' :
@@ -116,13 +146,13 @@ export default function AuditLogs() {
                         {log.action_type}
                       </span>
                     </td>
-                    <td className="px-8 py-5">
-                      <p className="font-bold text-gray-500 text-xs uppercase tracking-widest">{log.table_name}</p>
+                    <td className="px-5 md:px-8 py-4 md:py-5">
+                      <p className="font-bold text-gray-500 text-[10px] uppercase tracking-widest">{log.table_name}</p>
                     </td>
-                    <td className="px-8 py-5">
+                    <td className="px-5 md:px-8 py-4 md:py-5">
                        <span className="font-mono text-xs text-gray-400">#{log.record_id}</span>
                     </td>
-                    <td className="px-8 py-5 text-center">
+                    <td className="px-5 md:px-8 py-4 md:py-5 text-center">
                       <button 
                         onClick={() => {
                           setSelectedLog(log);
