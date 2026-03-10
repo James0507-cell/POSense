@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { sale_id, refund_type, total_refund_amount, processed_by, approved_by, items } = body;
+        const { sale_id, refund_type, total_refund_amount, processed_by, items } = body;
 
         // If items are provided, we should do an atomic operation
         // Since Supabase JS client doesn't support multi-table transactions easily in one call,
@@ -32,8 +32,7 @@ export async function POST(request) {
                 sale_id: parseInt(sale_id),
                 refund_type,
                 total_refund_amount: parseFloat(total_refund_amount),
-                processed_by: parseInt(processed_by),
-                approved_by: approved_by ? parseInt(approved_by) : null
+                processed_by: parseInt(processed_by)
             }])
             .select();
 
