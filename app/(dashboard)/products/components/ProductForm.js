@@ -15,6 +15,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
     vat: '0',
     created_by: '',
     image_url: '',
+    status: 'Active',
   });
 
   const [brands, setBrands] = useState([]);
@@ -51,6 +52,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
         vat: product.vat || '0',
         updated_by: currentEmployeeId,
         image_url: product.image_url || '',
+        status: product.status || 'Active',
       });
     } else {
       setFormData(prev => ({ ...prev, created_by: currentEmployeeId }));
@@ -156,6 +158,21 @@ export default function ProductForm({ product, onClose, onSuccess }) {
 
         <form onSubmit={handleSubmit} className="p-5 md:p-8 space-y-4 md:space-y-6 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* Status Selection */}
+            <div className="space-y-1 md:space-y-2">
+              <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2.5 md:py-3 bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-700/10 focus:border-blue-700 outline-none transition-all"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+
             {/* Brand Selection */}
             <div className="space-y-1 md:space-y-2">
               <label className="text-xs md:text-sm font-bold text-gray-700 ml-1">Brand</label>

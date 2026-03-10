@@ -34,6 +34,21 @@ export async function POST(request) {
         const body = await request.json();
         const { product_id, location, quantity, minimum, maximum, created_by } = body;
         
+        // Validate product status
+        const { data: product, error: productError } = await supabase
+            .from('products')
+            .select('status')
+            .eq('product_id', product_id)
+            .single();
+
+        if (productError || !product) {
+            return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        }
+
+        if (product.status !== 'Active') {
+            return NextResponse.json({ error: "Cannot add inventory for an Inactive product" }, { status: 400 });
+        }
+
         const { data, error } = await supabase
             .from('inventory')
             .insert([
@@ -65,6 +80,23 @@ export async function PUT(request) {
     try {
         const body = await request.json();
         const { inventory_id, product_id, location, quantity, minimum, maximum, updated_by } = body;
+
+        // Validate product status if product_id is provided
+        if (product_id) {
+            const { data: product, error: productError } = await supabase
+                .from('products')
+                .select('status')
+                .eq('product_id', product_id)
+                .single();
+
+            if (productError || !product) {
+                return NextResponse.json({ error: "Product not found" }, { status: 404 });
+            }
+
+            if (product.status !== 'Active') {
+                return NextResponse.json({ error: "Cannot update inventory to an Inactive product" }, { status: 400 });
+            }
+        }
 
         const { data, error } = await supabase
             .from('inventory')

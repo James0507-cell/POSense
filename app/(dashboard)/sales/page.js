@@ -70,7 +70,7 @@ function SalesContent() {
         
         // Pre-filter types for the UI forms (only Active ones)
         setPaymentTypes(types); 
-        setProducts(productData);
+        setProducts(productData.filter(p => (p.status || 'Active') === 'Active'));
         setRefundsData(refunds);
         setSalesData(enrichSalesData(sales, types));
       }

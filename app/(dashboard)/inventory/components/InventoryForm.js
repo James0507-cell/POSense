@@ -20,7 +20,7 @@ export default function InventoryForm({ item, onClose, onSuccess }) {
 
     async function fetchProducts() {
         try {
-            const response = await fetch('/api/db-query?q=SELECT product_id, name FROM products');
+            const response = await fetch("/api/db-query?q=SELECT product_id, name, status FROM products WHERE status = 'Active'");
             if (response.ok) {
                 const data = await response.json();
                 setProducts(data);

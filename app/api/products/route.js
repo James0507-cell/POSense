@@ -34,7 +34,7 @@ export async function GET() {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { brand_id, name, barcode, description, category, cost_price, selling_price, vat, created_by, image_url } = body;
+        const { brand_id, name, barcode, description, category, cost_price, selling_price, vat, created_by, image_url, status } = body;
         
         const { data, error } = await supabase
             .from('products')
@@ -50,6 +50,7 @@ export async function POST(request) {
                     vat: Number(vat), 
                     created_by,
                     image_url,
+                    status: status || 'Active',
                     created_at: new Date().toISOString()
                 }
             ])
@@ -70,7 +71,7 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const body = await request.json();
-        const { product_id, brand_id, name, barcode, description, category, cost_price, selling_price, vat, updated_by, image_url } = body;
+        const { product_id, brand_id, name, barcode, description, category, cost_price, selling_price, vat, updated_by, image_url, status } = body;
 
         const { data, error } = await supabase
             .from('products')
@@ -85,6 +86,7 @@ export async function PUT(request) {
                 vat: Number(vat), 
                 updated_by, 
                 image_url,
+                status,
                 updated_at: new Date().toISOString() 
             })
             .eq('product_id', product_id)
@@ -100,22 +102,8 @@ export async function PUT(request) {
 }
 
 export async function DELETE(request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const id = searchParams.get('id');
-        
-        if (!id) throw new Error("Product ID is required");
-
-        const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('product_id', id);
-
-        if (error) throw error;
-
-        return NextResponse.json({ message: "Product deleted successfully" });
-    } catch (error) {
-        console.error("Supabase error in DELETE /api/products:", error);
-        return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
-    }
+    return NextResponse.json(
+        { error: "Delete functionality is disabled. Please set the product status to Inactive instead." },
+        { status: 403 }
+    );
 }
